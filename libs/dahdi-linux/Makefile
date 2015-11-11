@@ -27,7 +27,7 @@ include $(INCLUDE_DIR)/package.mk
 define KernelPackage/dahdi
   SUBMENU:=Voice over IP
   TITLE:=DAHDI basic infrastructure
-  DEPENDS:=@USB_SUPPORT +kmod-lib-crc-ccitt
+  DEPENDS:=@USB_SUPPORT
   URL:=http://www.asterisk.org/
   FILES:= $(PKG_BUILD_DIR)/drivers/dahdi/dahdi.$(LINUX_KMOD_SUFFIX)
   AUTOLOAD:=$(call AutoProbe,dahdi)

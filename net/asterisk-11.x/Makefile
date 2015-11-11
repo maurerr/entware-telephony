@@ -9,12 +9,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=asterisk11
-PKG_VERSION:=11.19.0
-PKG_RELEASE:=2
+PKG_VERSION:=11.20.0
+PKG_RELEASE:=1
 
 PKG_SOURCE:=asterisk-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://downloads.asterisk.org/pub/telephony/asterisk/releases/
-PKG_MD5SUM:=f10259509aeda1e9f47dd57e5cc23680
+PKG_MD5SUM:=d15759b05862250073e2708394ad2f4c
 
 PKG_BUILD_DIR=$(BUILD_DIR)/asterisk-$(PKG_VERSION)
 PKG_BUILD_DEPENDS:=libxml2/host
@@ -169,6 +169,7 @@ ifneq ($(SDK)$(CONFIG_PACKAGE_asterisk11-chan-dahdi),)
 else
   CONFIGURE_ARGS+= \
 	--without-dahdi \
+	--without-pri \
 	--without-tonezone
 endif
 
@@ -257,7 +258,6 @@ CONFIGURE_ARGS+= \
 	--without-ogg \
 	--without-osptk \
 	--with-popt="$(STAGING_DIR)/opt" \
-	--without-pri \
 	--without-pwlib \
 	--without-radius \
 	--without-sdl \
