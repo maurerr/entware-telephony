@@ -10,7 +10,7 @@ include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=dahdi-linux
 PKG_VERSION:=2.10.2
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://downloads.asterisk.org/pub/telephony/dahdi-linux/releases/
@@ -27,7 +27,7 @@ include $(INCLUDE_DIR)/package.mk
 define KernelPackage/dahdi
   SUBMENU:=Voice over IP
   TITLE:=DAHDI basic infrastructure
-  DEPENDS:=@USB_SUPPORT
+  DEPENDS:=@USB_SUPPORT +kmod-lib-crc-ccitt
   URL:=http://www.asterisk.org/
   FILES:= $(PKG_BUILD_DIR)/drivers/dahdi/dahdi.$(LINUX_KMOD_SUFFIX)
   AUTOLOAD:=$(call AutoProbe,dahdi)
