@@ -1,2 +1,5 @@
-commit:	6dd432b5be7f27f4a4f49cd0a3e6a2c801b99583
-Date:	Jan 19, 2016
+commit 6dd432b5be7f27f4a4f49cd0a3e6a2c801b99583
+Author: Daniel Golle <daniel@makrotopia.org>
+Date:   Tue Jan 19 10:46:43 2016 +0100
+
+    dahdi-linux: skip blob firmware download
