@@ -1,20 +1,16 @@
-Index: kamailio4-4.3.0/modules/cnxcc/Makefile
-===================================================================
---- kamailio4-4.3.0.orig/modules/cnxcc/Makefile
-+++ kamailio4-4.3.0/modules/cnxcc/Makefile
-@@ -8,7 +8,7 @@ include ../../Makefile.defs
- auto_gen=
- NAME=cnxcc.so
+--- a/modules/cnxcc/Makefile
++++ b/modules/cnxcc/Makefile
+@@ -45,7 +45,7 @@ else
+ endif
  
--LIBS=-lhiredis -levent
-+LIBS=-lhiredis -levent $(EXTRA_LIBS)
+ DEFS+=$(HIREDISDEFS) $(LEVENTDEFS)
+-LIBS=$(HIREDISLIBS) $(LEVENTLIBS)
++LIBS=$(HIREDISLIBS) $(LEVENTLIBS) $(EXTRA_LIBS)
+ 
  DEFS+=-DOPENSER_MOD_INTERFACE
  SERLIBPATH=../../lib
- SER_LIBS+=$(SERLIBPATH)/kmi/kmi
-Index: kamailio4-4.3.0/modules/janssonrpc-c/netstring.h
-===================================================================
---- kamailio4-4.3.0.orig/modules/janssonrpc-c/netstring.h
-+++ kamailio4-4.3.0/modules/janssonrpc-c/netstring.h
+--- a/modules/janssonrpc-c/netstring.h
++++ b/modules/janssonrpc-c/netstring.h
 @@ -24,6 +24,7 @@
  #define __NETSTRING_STREAM_H
  
