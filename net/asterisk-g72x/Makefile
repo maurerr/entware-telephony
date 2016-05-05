@@ -93,6 +93,5 @@ endef
 Package/asterisk11-codec-g729/install = $(Package/Install/Default)
 Package/asterisk13-codec-g729/install = $(Package/Install/Default)
 
-$(eval $(call BuildPackage,asterisk18-codec-g729))
 $(eval $(call BuildPackage,asterisk11-codec-g729))
 #$(eval $(call BuildPackage,asterisk13-codec-g729))
