@@ -33,7 +33,7 @@ define Package/chan-sccp-b/Default
   CATEGORY:=Network
   TITLE:=SCCP channel provider support
   URL:=http://chan-sccp-b.sourceforge.net/
-  DEPENDS:= +libltdl
+  DEPENDS:= +libltdl +libbfd
 endef
 
 define Package/asterisk13-chan-sccp-b
