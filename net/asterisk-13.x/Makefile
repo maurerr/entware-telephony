@@ -1,6 +1,6 @@
 #
-# Copyright (C) 2015 OpenWrt.org
-# Copyright (C) 2015 Cesnet, z.s.p.o.
+# Copyright (C) 2016 OpenWrt.org
+# Copyright (C) 2016 Cesnet, z.s.p.o.
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -9,19 +9,19 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=asterisk13
-PKG_VERSION:=13.6.0
+PKG_VERSION:=13.9.1
 PKG_RELEASE:=1
 
 PKG_SOURCE:=asterisk-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://downloads.asterisk.org/pub/telephony/asterisk/releases/
-PKG_MD5SUM:=66355aec4336c068f25e7df739786e72
+PKG_MD5SUM:=76c42992a79f41ec467ed20500e8b249
 
-PKG_BUILD_DIR=$(BUILD_DIR)/asterisk-$(PKG_VERSION)
+PKG_BUILD_DIR:=$(BUILD_DIR)/asterisk-$(PKG_VERSION)
 PKG_BUILD_DEPENDS:=libxml2/host
 
 PKG_LICENSE:=GPL-2.0
 PKG_LICENSE_FILES:=COPYING LICENSE
-PKG_MAINTAINER:=Jiri Slachta <slachta@cesnet.cz>
+PKG_MAINTAINER:=Jiri Slachta <jiri@slachta.eu>
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -37,7 +37,7 @@ endef
 
 define Package/asterisk13/install/lib
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/lib/$(2).so* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/$(2).so* $(1)/usr/lib/
 endef
 
 define Package/asterisk13/install/sbin
@@ -103,11 +103,13 @@ endef
 define Package/asterisk13/conffiles
 /etc/asterisk/asterisk.conf
 /etc/asterisk/acl.conf
+/etc/asterisk/cel.conf
 /etc/asterisk/ccss.conf
 /etc/asterisk/modules.conf
 /etc/asterisk/extconfig.conf
 /etc/asterisk/extensions.conf
 /etc/asterisk/features.conf
+/etc/asterisk/http.conf
 /etc/asterisk/indications.conf
 /etc/asterisk/logger.conf
 /etc/asterisk/manager.conf
@@ -121,8 +123,8 @@ define Package/asterisk13/conffiles
 endef
 
 AST_CFG_FILES:= \
-	asterisk.conf acl.conf ccss.conf extconfig.conf \
-	extensions.conf features.conf indications.conf \
+	asterisk.conf acl.conf cel.conf ccss.conf extconfig.conf \
+	extensions.conf features.conf http.conf indications.conf \
 	logger.conf manager.conf modules.conf udptl.conf \
 	users.conf res_config_sqlite3.conf
 
@@ -205,7 +207,7 @@ CONFIGURE_ARGS+= \
 	--with-popt="$(STAGING_DIR)/usr" \
 	--without-pwlib \
 	--without-radius \
-	$(if $(CONFIG_PACKAGE_$(PKG_NAME)-res-fax-spandsp),--with-spandsp="$(STAGING_DIR)/usr",--without-spandsp) \
+	--without-spandsp \
 	$(if $(CONFIG_PACKAGE_$(PKG_NAME)-res-xmpp),--with-iksemel="$(STAGING_DIR)/usr",--without-iksemel) \
 	--without-sdl \
 	--without-sqlite \
@@ -242,13 +244,13 @@ define Build/Configure
 		$(HOST_CONFIGURE_ARGS) \
 		$(AST_MENUSELECT_OPTS) \
 		LDFLAGS="$(HOST_LDFLAGS) -lxml2" \
-		CFLAGS="$(HOST_CFLAGS) -I$(STAGING_DIR_HOST)/include/libxml2" \
+		CFLAGS="$(HOST_CFLAGS) -I$(STAGING_DIR)/host/include/libxml2" \
 	);
 endef
 
 define Build/Compile
 	$(MAKE) -C "$(PKG_BUILD_DIR)/menuselect" \
-		CFLAGS="$(HOST_CFLAGS) -I$(STAGING_DIR_HOST)/include/libxml2" \
+		CFLAGS="$(HOST_CFLAGS) -I$(STAGING_DIR)/host/include/libxml2" \
 		LDFLAGS="$(HOST_LDFLAGS) -lxml2"
 	$(MAKE) -C "$(PKG_BUILD_DIR)" \
 		include/asterisk/version.h \
@@ -304,6 +306,7 @@ $(eval $(call BuildAsterisk13Module,app-minivm,Minimal voicemail system,a voicem
 $(eval $(call BuildAsterisk13Module,app-mixmonitor,Record a call and mix the audio,record a call and mix the audio during the recording,,,app_mixmonitor,,))
 $(eval $(call BuildAsterisk13Module,app-originate,Originate a call,originating an outbound call and connecting it to a specified extension or application,,,app_originate,,))
 $(eval $(call BuildAsterisk13Module,app-playtones,Playtones application,play a tone list,,,app_playtones,,))
+$(eval $(call BuildAsterisk13Module,app-queue,True Call Queueing,support for ACD,,queues.conf queuerules.conf,app_queue,))
 $(eval $(call BuildAsterisk13Module,app-read,Variable read,a trivial application to read a variable,,,app_read,,))
 $(eval $(call BuildAsterisk13Module,app-readexten,Extension to variable,a trivial application to read an extension into a variable,,,app_readexten,,))
 $(eval $(call BuildAsterisk13Module,app-record,Record sound file,to record a sound file,,,app_record,,))
@@ -325,8 +328,10 @@ $(eval $(call BuildAsterisk13Module,bridge-softmix,Multi-party software based ch
 $(eval $(call BuildAsterisk13Module,cdr,Provides CDR,Call Detail Record,,cdr.conf cdr_custom.conf cdr_manager.conf cdr_syslog.conf,app_cdr app_forkcdr cdr_custom cdr_manager cdr_syslog func_cdr,,))
 $(eval $(call BuildAsterisk13Module,cdr-csv,Provides CDR CSV,Call Detail Record with CSV support,,,cdr_csv,,))
 $(eval $(call BuildAsterisk13Module,cdr-sqlite3,Provides CDR SQLITE3,Call Detail Record with SQLITE3 support,libsqlite3,,cdr_sqlite3_custom,,))
+$(eval $(call BuildAsterisk13Module,chan-alsa,ALSA channel,the channel chan_alsa,+alsa-lib,alsa.conf,chan_alsa,,))
 $(eval $(call BuildAsterisk13Module,chan-dahdi,DAHDI channel,DAHDI channel support,+dahdi-tools-libtonezone +kmod-dahdi +libpri,chan_dahdi.conf,chan_dahdi,,))
 $(eval $(call BuildAsterisk13Module,chan-iax2,IAX2 channel,IAX support,+asterisk13-res-timing-timerfd,iax.conf iaxprov.conf,chan_iax2,,))
+$(eval $(call BuildAsterisk13Module,chan-oss,OSS channel,the channel chan_oss,,oss.conf,chan_oss,,))
 $(eval $(call BuildAsterisk13Module,chan-sip,SIP channel,the channel chan_sip,+asterisk13-app-confbridge,sip.conf sip_notify.conf,chan_sip,,))
 $(eval $(call BuildAsterisk13Module,chan-skinny,Skinny channel,the channel chan_skinny,,skinny.conf,chan_skinny,,))
 $(eval $(call BuildAsterisk13Module,chan-unistim,Unistim channel,channel driver for the UNISTIM (Unified Networks IP Stimulus) protocol,,unistim.conf,chan_unistim,,))
@@ -366,6 +371,7 @@ $(eval $(call BuildAsterisk13Module,func-global,Global variable,global variable 
 $(eval $(call BuildAsterisk13Module,func-groupcount,Group count,for counting number of channels in the specified group,,,func_groupcount,,))
 $(eval $(call BuildAsterisk13Module,func-math,Math functions,Math functions,,,func_math,))
 $(eval $(call BuildAsterisk13Module,func-module,Simple module check function,Simple module check function,,,func_module,))
+$(eval $(call BuildAsterisk13Module,func-presencestate,Hinted presence state,Gets or sets a presence state in the dialplan,,,func_presencestate,,))
 $(eval $(call BuildAsterisk13Module,func-realtime,realtime,the realtime dialplan function,,,func_realtime,,))
 $(eval $(call BuildAsterisk13Module,func-shell,Shell,support for shell execution,,,func_shell,,))
 $(eval $(call BuildAsterisk13Module,func-uri,URI encoding and decoding,Encodes and decodes URI-safe strings,,,func_uri,,))
@@ -382,7 +388,9 @@ $(eval $(call BuildAsterisk13Module,res-ael-share,Shareable AEL code,support for
 $(eval $(call BuildAsterisk13Module,res-agi,Asterisk Gateway Interface,Support for the Asterisk Gateway Interface extension,,,res_agi,,))
 $(eval $(call BuildAsterisk13Module,res-calendar,Calendaring API,Calendaring support (ICal and Google Calendar),,calendar.conf,res_calendar,,))
 $(eval $(call BuildAsterisk13Module,res-clioriginate,Calls via CLI,Originate calls via the CLI,,,res_clioriginate,,))
-$(eval $(call BuildAsterisk13Module,res-fax,FAX modules,Generic FAX resource for FAX technology resource modules,+asterisk13-res-timing-pthread,udptl.conf res_fax.conf,res_fax,,))
+$(eval $(call BuildAsterisk13Module,res-hep,HEPv3 API,,,,res_hep,,))
+$(eval $(call BuildAsterisk13Module,res-hep-pjsip,PJSIP HEPv3 Logger,,+asterisk13-res-hep +asterisk13-pjsip,,res_hep,,))
+$(eval $(call BuildAsterisk13Module,res-hep-rtcp,RTCP HEPv3 Logger,,+asterisk13-res-hep,,res_hep,,))
 $(eval $(call BuildAsterisk13Module,res-http-websocket,HTTP websocket support,,,,res_http_websocket,,))
 $(eval $(call BuildAsterisk13Module,res-monitor,Provide Monitor,Cryptographic Signature capability,,,res_monitor,,))
 $(eval $(call BuildAsterisk13Module,res-musiconhold,MOH,Music On Hold support,,musiconhold.conf,res_musiconhold,,))
@@ -398,3 +406,4 @@ $(eval $(call BuildAsterisk13Module,res-timing-dahdi,DAHDI Timing Interface,,+as
 $(eval $(call BuildAsterisk13Module,res-timing-pthread,pthread Timing Interface,,,,res_timing_pthread,,))
 $(eval $(call BuildAsterisk13Module,res-timing-timerfd,Timerfd Timing Interface,,,,res_timing_timerfd,,))
 $(eval $(call BuildAsterisk13Module,voicemail,Voicemail,voicemail related modules,+asterisk13-res-adsi +asterisk13-res-smdi,voicemail.conf,app_voicemail,vm-*,))
+

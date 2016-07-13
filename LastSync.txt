@@ -1,5 +1,6 @@
-commit 4b395e935801871a8c1b4c6834655c18d9792449
-Author: Jiri Slachta <slachta@cesnet.cz>
-Date:   Thu Apr 7 16:20:12 2016 +0200
+commit 5ece22d67e79cdd5dffa9301df61393442f21314
+Merge: d2bfa9f f915b79
+Author: Jiri Slachta <jiri.slachta@gmail.com>
+Date:   Mon Jul 4 12:17:44 2016 +0200
 
-    asterisk-{11.x,13.x}: remove module fax and fax-spandsp
+    Merge pull request #115 from alfredh/master
