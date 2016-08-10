@@ -1,6 +1,5 @@
-commit 5ece22d67e79cdd5dffa9301df61393442f21314
-Merge: d2bfa9f f915b79
-Author: Jiri Slachta <jiri.slachta@gmail.com>
-Date:   Mon Jul 4 12:17:44 2016 +0200
+commit 1f0fb2538ba6fc306198fe2a9a4b976d63adb304
+Author: Daniel Golle <daniel@makrotopia.org>
+Date:   Fri Jul 15 11:49:55 2016 +0200
 
-    Merge pull request #115 from alfredh/master
+    dahdi-tools: fix build
