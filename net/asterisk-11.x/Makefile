@@ -5,6 +5,7 @@
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
+# Entware: added postgresql/host dependency - pg_config is not found without it????
 
 include $(TOPDIR)/rules.mk
 
@@ -17,7 +18,7 @@ PKG_SOURCE_URL:=http://downloads.asterisk.org/pub/telephony/asterisk/releases/
 PKG_MD5SUM:=35870c34fadbd2bcb284bd8521c6e689
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/asterisk-$(PKG_VERSION)
-PKG_BUILD_DEPENDS:=libxml2/host
+PKG_BUILD_DEPENDS:=libxml2/host postgresql/host
 
 PKG_LICENSE:=GPL-2.0
 PKG_LICENSE_FILES:=COPYING LICENSE
@@ -269,13 +270,14 @@ CONFIGURE_ARGS+= \
 	--disable-xmldoc
 
 CONFIGURE_VARS += \
-	ac_cv_path_ac_pt_CONFIG_LIBXML2=$(STAGING_DIR)/host/bin/xml2-config
+	ac_cv_path_ac_pt_CONFIG_LIBXML2=$(STAGING_DIR_HOSTPKG)/bin/xml2-config \
+	ac_cv_path_PG_CONFIG=$(STAGING_DIR_HOSTPKG)/bin/pg_config \
 
 AST_MENUSELECT_OPTS = \
 	--without-newt \
 	--without-curses \
-	--with-ncurses="$(STAGING_DIR)/host/opt" \
-	--with-libxml2="$(STAGING_DIR)/host/opt"
+	--with-ncurses="$(STAGING_DIR)/host/usr" \
+	--with-libxml2="$(STAGING_DIR)/host/usr"
 
 define Build/Configure
 	(cd $(PKG_BUILD_DIR); \
@@ -296,13 +298,13 @@ define Build/Configure
 		$(HOST_CONFIGURE_ARGS) \
 		$(AST_MENUSELECT_OPTS) \
 		LDFLAGS="$(HOST_LDFLAGS) -lxml2" \
-		CFLAGS="$(HOST_CFLAGS) -I$(STAGING_DIR)/host/include/libxml2" \
+		CFLAGS="$(HOST_CFLAGS) -I$(STAGING_DIR_HOSTPKG)/include/libxml2" \
 	);
 endef
 
 define Build/Compile
 	$(MAKE) -C "$(PKG_BUILD_DIR)/menuselect" \
-		CFLAGS="$(HOST_CFLAGS) -I$(STAGING_DIR)/host/include/libxml2" \
+		CFLAGS="$(HOST_CFLAGS) -I$(STAGING_DIR_HOSTPKG)/include/libxml2" \
 		LDFLAGS="$(HOST_LDFLAGS) -lxml2"
 	$(MAKE) -C "$(PKG_BUILD_DIR)" include/asterisk/version.h \
 		include/asterisk/buildopts.h defaults.h \
