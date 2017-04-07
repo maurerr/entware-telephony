@@ -107,10 +107,12 @@ define Package/asterisk11/conffiles
 /opt/etc/asterisk/asterisk.conf
 /opt/etc/asterisk/acl.conf
 /opt/etc/asterisk/ccss.conf
+/opt/etc/asterisk/cel.conf
 /opt/etc/asterisk/modules.conf
 /opt/etc/asterisk/extconfig.conf
 /opt/etc/asterisk/extensions.conf
 /opt/etc/asterisk/features.conf
+/opt/etc/asterisk/http.conf
 /opt/etc/asterisk/indications.conf
 /opt/etc/asterisk/logger.conf
 /opt/etc/asterisk/manager.conf
@@ -167,6 +169,7 @@ endef
 ifneq ($(SDK)$(CONFIG_PACKAGE_asterisk11-chan-dahdi),)
   CONFIGURE_ARGS+= \
 	--with-dahdi="$(STAGING_DIR)/opt" \
+	--with-pri="$(STAGING_DIR)/opt" \
 	--with-tonezone="$(STAGING_DIR)/opt"
 else
   CONFIGURE_ARGS+= \
@@ -208,6 +211,14 @@ ifneq ($(SDK)$(CONFIG_PACKAGE_asterisk11-pgsql),)
 else
   CONFIGURE_ARGS+= \
 	--without-postgres
+endif
+
+ifneq ($(SDK)$(CONFIG_PACKAGE_asterisk11-res-fax-spandsp),)
+#  CONFIGURE_ARGS+= \
+#	--with-spandsp="$(STAGING_DIR)/opt"
+#else
+  CONFIGURE_ARGS+= \
+	--without-spandsp
 endif
 
 ifneq ($(SDK)$(CONFIG_PACKAGE_asterisk11-res-srtp),)
@@ -255,7 +266,6 @@ CONFIGURE_ARGS+= \
 	--without-pwlib \
 	--without-radius \
 	--without-sdl \
-	--without-spandsp \
 	--without-sqlite \
 	--with-sqlite3="$(STAGING_DIR)/opt" \
 	--without-suppserv \
@@ -278,6 +288,13 @@ AST_MENUSELECT_OPTS = \
 	--without-curses \
 	--with-ncurses="$(STAGING_DIR)/host/usr" \
 	--with-libxml2="$(STAGING_DIR)/host/usr"
+
+#define Build/Prepare
+#	$(call Build/Prepare/Default)
+#ifneq ($(CONFIG_TARGET_lantiq),)
+#	$(CP) ./src-lantiq/* $(PKG_BUILD_DIR)/
+#endif
+#endef
 
 define Build/Configure
 	(cd $(PKG_BUILD_DIR); \
@@ -367,6 +384,7 @@ $(eval $(call BuildAsterisk11Module,app-record,Record sound file,to record a sou
 $(eval $(call BuildAsterisk11Module,app-sayunixtime,Say Unix time,an application to say Unix time,,,,app_sayunixtime,))
 $(eval $(call BuildAsterisk11Module,app-senddtmf,Send DTMF digits,Sends arbitrary DTMF digits,,,,app_senddtmf,))
 $(eval $(call BuildAsterisk11Module,app-sms,SMS,SMS support (ETSI ES 201 912 protocol 1),+libpopt +libstdcpp,,,app_sms,,smsq))
+#$(eval $(call BuildAsterisk11Module,app-speech,Dialplan Speech,Dialplan Speech Applications,+asterisk11-res-speech,,,app_speech_utils,))
 $(eval $(call BuildAsterisk11Module,app-stack,Stack applications,Stack applications Gosub Return etc.,+asterisk11-res-agi,,,app_stack,))
 $(eval $(call BuildAsterisk11Module,app-system,System exec,support for executing system commands,,,,app_system,))
 $(eval $(call BuildAsterisk11Module,app-talkdetect,File playback with audio detect,for file playback with audio detect,,,,app_talkdetect,))
@@ -380,6 +398,7 @@ $(eval $(call BuildAsterisk11Module,chan-alsa,ALSA channel,the channel chan_alsa
 $(eval $(call BuildAsterisk11Module,chan-agent,Agents proxy channel,an implementation of agents proxy channel,,,,chan_agent,))
 $(eval $(call BuildAsterisk11Module,chan-dahdi,DAHDI channel,DAHDI channel support,+dahdi-tools-libtonezone +kmod-dahdi +libpri,/opt/etc/asterisk/chan_dahdi.conf,chan_dahdi.conf,chan_dahdi,))
 $(eval $(call BuildAsterisk11Module,chan-iax2,IAX2 channel,IAX support,+asterisk11-res-timing-timerfd,/opt/etc/asterisk/iax.conf /opt/etc/asterisk/iaxprov.conf,iax.conf iaxprov.conf,chan_iax2,))
+#$(eval $(call BuildAsterisk11Module,chan-lantiq,Lantiq TAPI channel,An implementation of Lantiq TAPI channel,@TARGET_lantiq +kmod-ltq-vmmc,/etc/asterisk/lantiq.conf,lantiq.conf,chan_lantiq,))
 $(eval $(call BuildAsterisk11Module,chan-mgcp,MGCP channel,the channel chan_mgcp,,/opt/etc/asterisk/mgcp.conf,mgcp.conf,chan_mgcp,))
 $(eval $(call BuildAsterisk11Module,chan-motif,Jingle channel,Motif Jingle Channel Driver,+asterisk11-res-xmpp,/opt/etc/asterisk/motif.conf /opt/etc/asterisk/jingle.conf,motif.conf jingle.conf,chan_motif,))
 $(eval $(call BuildAsterisk11Module,chan-ooh323,ooH323 channel,the channel chan_ooh323,,/opt/etc/asterisk/ooh323.conf,ooh323.conf,chan_ooh323,))
@@ -438,11 +457,14 @@ $(eval $(call BuildAsterisk11Module,res-ael-share,Shareable AEL code,support for
 $(eval $(call BuildAsterisk11Module,res-agi,Asterisk Gateway Interface,Support for the Asterisk Gateway Interface extension,,,,res_agi,))
 $(eval $(call BuildAsterisk11Module,res-calendar,Calendaring API,Calendaring support (ICal and Google Calendar),,/opt/etc/asterisk/calendar.conf,calendar.conf,res_calendar,,))
 $(eval $(call BuildAsterisk11Module,res-clioriginate,Calls via CLI,Originate calls via the CLI,,,,res_clioriginate,))
+#$(eval $(call BuildAsterisk11Module,res-fax-spandsp,Spandsp T.38 and G.711,Spandsp T.38 and G.711 FAX Resource,+asterisk11-res-fax +libspandsp +libtiff,,,res_fax_spandsp,))
+#$(eval $(call BuildAsterisk11Module,res-fax,FAX modules,Generic FAX resource for FAX technology resource modules,+asterisk11-res-timing-pthread,/opt/etc/asterisk/res_fax.conf,res_fax.conf,res_fax,))
 $(eval $(call BuildAsterisk11Module,res-monitor,Provide Monitor,Cryptographic Signature capability,,,,res_monitor,))
 $(eval $(call BuildAsterisk11Module,res-musiconhold,MOH,Music On Hold support,,/opt/etc/asterisk/musiconhold.conf,musiconhold.conf,res_musiconhold,))
 $(eval $(call BuildAsterisk11Module,res-phoneprov,Phone Provisioning,Phone provisioning application for the asterisk internal http server,,/opt/etc/asterisk/phoneprov.conf,phoneprov.conf,res_phoneprov,))
 $(eval $(call BuildAsterisk11Module,res-pktccops,Provide PacketCable COPS,simple client/server model for supporting policy control over QoS signaling protocols,,/opt/etc/asterisk/res_pktccops.conf,res_pktccops.conf,res_pktccops,))
 $(eval $(call BuildAsterisk11Module,res-smdi,Provide SMDI,Simple Message Desk Interface capability,,/opt/etc/asterisk/smdi.conf,smdi.conf,res_smdi,))
+#$(eval $(call BuildAsterisk11Module,res-speech,Speech Recognition API,Support for the Asterisk Generic Speech Recognition API,,,,res_speech,))
 $(eval $(call BuildAsterisk11Module,res-srtp,SRTP,Secure RTP,+libsrtp,,,res_srtp,))
 $(eval $(call BuildAsterisk11Module,res-timing-dahdi,DAHDI Timing Interface,,+asterisk11-chan-dahdi,,,res_timing_dahdi,))
 $(eval $(call BuildAsterisk11Module,res-timing-pthread,pthread Timing Interface,,,,,res_timing_pthread,))
