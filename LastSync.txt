@@ -1,5 +1,8 @@
-commit 1f0fb2538ba6fc306198fe2a9a4b976d63adb304
-Author: Daniel Golle <daniel@makrotopia.org>
-Date:   Fri Jul 15 11:49:55 2016 +0200
+commit 6db8bc07063386cdb2b20716d5dde66127399422
+Merge: 68d8da8 e71ca4a
+Author: Daniel Golle <dangowrt@users.noreply.github.com>
+Date:   Fri Mar 10 01:01:15 2017 +0100
 
-    dahdi-tools: fix build
+    Merge pull request #136 from kochstefan/feature_fax_speech
+    
+    Feature fax speech
