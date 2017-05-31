@@ -1,8 +1,8 @@
-commit 6db8bc07063386cdb2b20716d5dde66127399422
-Merge: 68d8da8 e71ca4a
-Author: Daniel Golle <dangowrt@users.noreply.github.com>
-Date:   Fri Mar 10 01:01:15 2017 +0100
+commit 3cce8976b1d074946151a24a79256a0c5e70a666
+Merge: 4aac26a af2f504
+Author: Jiri Slachta <jiri.slachta@gmail.com>
+Date:   Wed May 24 14:05:59 2017 +0200
 
-    Merge pull request #136 from kochstefan/feature_fax_speech
+    Merge pull request #148 from micmac1/PR
     
-    Feature fax speech
+    Pull request for 5 commits
