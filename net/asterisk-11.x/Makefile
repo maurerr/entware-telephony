@@ -11,7 +11,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=asterisk11
 PKG_VERSION:=11.25.1
-PKG_RELEASE:=1
+PKG_RELEASE:=1a
 
 PKG_SOURCE:=asterisk-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://downloads.asterisk.org/pub/telephony/asterisk/releases/
