@@ -466,7 +466,7 @@ $(eval $(call BuildAsterisk11Module,res-pktccops,Provide PacketCable COPS,simple
 $(eval $(call BuildAsterisk11Module,res-smdi,Provide SMDI,Simple Message Desk Interface capability,,/opt/etc/asterisk/smdi.conf,smdi.conf,res_smdi,))
 #$(eval $(call BuildAsterisk11Module,res-speech,Speech Recognition API,Support for the Asterisk Generic Speech Recognition API,,,,res_speech,))
 $(eval $(call BuildAsterisk11Module,res-srtp,SRTP,Secure RTP,+libsrtp,,,res_srtp,))
-$(eval $(call BuildAsterisk11Module,res-stun-monitor,STUN monitoring,resource STUN Monitor,,/etc/asterisk/res_stun_monitor.conf,res_stun_monitor.conf,res_stun_monitor,))
+$(eval $(call BuildAsterisk11Module,res-stun-monitor,STUN monitoring,resource STUN Monitor,,/opt/etc/asterisk/res_stun_monitor.conf,res_stun_monitor.conf,res_stun_monitor,))
 $(eval $(call BuildAsterisk11Module,res-timing-dahdi,DAHDI Timing Interface,,+asterisk11-chan-dahdi,,,res_timing_dahdi,))
 $(eval $(call BuildAsterisk11Module,res-timing-pthread,pthread Timing Interface,,,,,res_timing_pthread,))
 $(eval $(call BuildAsterisk11Module,res-timing-timerfd,Timerfd Timing Interface,,,,,res_timing_timerfd,))
