@@ -8,12 +8,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=asterisk-g72x
-PKG_VERSION:=1.3
+PKG_VERSION:=1.4.1
 PKG_RELEASE:=2
 
 PKG_SOURCE:=asterisk-g72x-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=http://asterisk.hosting.lv/src/
-PKG_MD5SUM:=05825dfbe4959dc5c90b2f7b91e3d4e3
+PKG_HASH:=1d1356202de12ee3e636d5146e0e905533b4bf4c6b68eaa7d7789cbaa305059c
 
 PKG_BUILD_DIR=$(BUILD_DIR)/asterisk-g72x-$(PKG_VERSION)
 PKG_FIXUP:=autoreconf
@@ -22,6 +22,8 @@ PKG_INSTALL:=1
 PKG_LICENSE:=GPL-3.0
 PKG_LICENSE_FILES:=README.md
 PKG_MAINTAINER:=Alex Samorukov <samm@os2.kiev.ua>
+
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(BUILD_VARIANT)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 
