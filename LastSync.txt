@@ -1,8 +1,10 @@
-commit 3cce8976b1d074946151a24a79256a0c5e70a666
-Merge: 4aac26a af2f504
-Author: Jiri Slachta <jiri.slachta@gmail.com>
-Date:   Wed May 24 14:05:59 2017 +0200
+commit 264f4e872fa307477f8cb2f23174c5b4a644d513
+Author: Jiri Slachta <jiri@slachta.eu>
+Date:   Wed Sep 13 15:31:54 2017 +0200
 
-    Merge pull request #148 from micmac1/PR
-    
-    Pull request for 5 commits
+    asterisk-13.x: mark chan-lantiq as nonshared
+
+    Because asterisk13-chan-lantiq is target specific package,
+    it needs PKG_FLAGS variable set to nonshared.
+
+    Signed-off-by: Jiri Slachta <jiri@slachta.eu>
