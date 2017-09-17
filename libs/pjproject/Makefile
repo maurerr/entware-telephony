@@ -11,10 +11,10 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=pjproject
 PKG_VERSION:=2.6
-PKG_RELEASE:=1
+PKG_RELEASE:=3
 
 PKG_SOURCE:=pjproject-$(PKG_VERSION).tar.bz2
-PKG_SOURCE_URL:=http://www.pjsip.org/release/$(PKG_VERSION)/
+PKG_SOURCE_URL:=http://www.pjsip.org/release/$(PKG_VERSION)
 PKG_HASH:=2f5a1da1c174d845871c758bd80fbb580fca7799d3cfaa0d3c4e082b5161c7b4
 PKG_INSTALL:=1
 PKG_FIXUP:=autoreconf
@@ -31,13 +31,13 @@ define Package/pjproject/Default
   SECTION:=lib
   CATEGORY:=Libraries
   SUBMENU:=Telephony
-  URL:=http://www.pjsip.org/
-  DEPENDS:=+libuuid +libstdcpp +libpthread
+  URL:=http://www.pjsip.org
+  DEPENDS:=+libopenssl +libuuid +libstdcpp +libpthread
 endef
 
 define Package/pjproject/install/lib
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/$(2).so* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/$(2).so* $(1)/usr/lib
 endef
 
 define PJSIPpackage
@@ -54,67 +54,66 @@ $(call Package/pjproject/install/lib,$$(1),$2)
   $$(eval $$(call BuildPackage,$(1)))
 endef
 
-CONFIGURE_ARGS += \
-	--enable-shared \
-	--disable-floating-point \
-	--enable-g711-codec \
-	--disable-l16-codec \
+CONFIGURE_ARGS+= \
+	$(if $(CONFIG_SOFT_FLOAT),--disable-floating-point) \
+	--disable-ext-sound \
+	--disable-ffmpeg \
+	--disable-g711-codec \
 	--disable-g722-codec \
 	--disable-g7221-codec \
 	--disable-gsm-codec \
-	--disable-ilbc-coder \
+	--disable-ilbc-codec \
 	--disable-ipp \
-	--disable-ssl \
-	--disable-oss \
-	--disable-sound \
+	--disable-l16-codec \
 	--disable-libwebrtc \
 	--disable-libyuv \
-	--with-external-srtp="$(STAGING_DIR)/usr" \
-	--without-external-gsm \
-	--disable-small-filter \
-	--disable-large-filter \
-	--disable-speex-aec \
-	--disable-g711-codec \
-	--disable-l16-codec \
-	--disable-gsm-codec \
-	--disable-g722-codec \
-	--disable-g7221-codec \
-	--disable-speex-codec \
-	--disable-ilbc-codec \
-	--disable-resample-dll \
+	--disable-opencore-amr \
+	--disable-openh264 \
+	--disable-opus \
+	--disable-oss \
+	--disable-resample \
 	--disable-sdl \
-	--disable-ffmpeg \
-	--disable-v4l2
+	--disable-silk \
+	--disable-sound \
+	--disable-speex-aec \
+	--disable-speex-codec \
+	--disable-v4l2 \
+	--disable-video \
+	--enable-shared \
+	--with-external-srtp="$(STAGING_DIR)/usr" \
+	--with-ssl="$(STAGING_DIR)/usr" \
+	--without-external-gsm \
+	--without-external-pa \
+	--without-external-webrtc
 
-TARGET_LDFLAGS+=-lc $(LIBGCC) -lm
-TARGET_CFLAGS+=$(EXTRA_CFLAGS) $(TARGET_CPPFLAGS) $(EXTRA_CPPFLAGS)
+TARGET_CFLAGS+=$(TARGET_CPPFLAGS)
 
 define Build/Compile
 	$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR)
 endef
 
-PJPROJECT_LIBS = \
-	libpj libpjlib-util libpjmedia-audiodev libpjmedia-codec \
-	libpjmedia-videodev libpjmedia libpjnath libpjsip-simple \
-	libpjsip-ua libpjsip libpjsua libpjsua2 libresample
+PJPROJECT_LIBS:= \
+	libpj libpjlib-util libpjmedia libpjnath libpjsip-simple \
+	libpjsip-ua libpjsip libpjsua libpjsua2
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/{include,lib}
 	
-	$(CP) -R $(PKG_INSTALL_DIR)/usr/include/* $(1)/usr/include/
+	$(CP) -R $(PKG_INSTALL_DIR)/usr/include/* $(1)/usr/include
 
-	$(foreach m,$(PJPROJECT_LIBS),$(CP) $(PKG_INSTALL_DIR)/usr/lib/$(m)* $(1)/usr/lib/;)
+	$(foreach m,$(PJPROJECT_LIBS),$(CP) $(PKG_INSTALL_DIR)/usr/lib/$(m)* $(1)/usr/lib;)
+
 	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/libpjproject.pc $(1)/usr/lib/pkgconfig/
+	$(SED) 's|$(TARGET_CFLAGS)||' $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/libpjproject.pc
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/libpjproject.pc $(1)/usr/lib/pkgconfig
 endef
 
 $(eval $(call PJSIPpackage,libpj,libpj,+librt))
 $(eval $(call PJSIPpackage,libpjlib-util,libpjlib-util,+libpj +librt))
-$(eval $(call PJSIPpackage,libpjmedia,libpjmedia*,+libpj +libpjlib-util +libpjnath +libresample +librt +libspeex +libsrtp))
+$(eval $(call PJSIPpackage,libpjmedia,libpjmedia*,+libpj +libpjlib-util +libpjnath +librt +libsrtp))
 $(eval $(call PJSIPpackage,libpjnath,libpjnath,+libpj +libpjlib-util +librt))
-$(eval $(call PJSIPpackage,libpjsip-simple,libpjsip-simple,+libpj +libpjlib-util +libpjsip +libresample +librt +libspeex +libsrtp))
-$(eval $(call PJSIPpackage,libpjsip-ua,libpjsip-ua,+libpj +libpjlib-util +libpjmedia +libpjsip-simple +libpjsip +libresample +librt +libspeex +libsrtp))
-$(eval $(call PJSIPpackage,libpjsip,libpjsip,+libpj +libpjlib-util +libresample +librt +libspeex +libsrtp))
-$(eval $(call PJSIPpackage,libpjsua,libpjsua,+libpj +libpjlib-util +libpjmedia +libpjnath +libpjsip-simple +libpjsip-ua +libpjsip +libresample +librt +libspeex +libsrtp))
-$(eval $(call PJSIPpackage,libpjsua2,libpjsua2,+libpj +libpjlib-util +libpjmedia +libpjnath +libpjsip-simple +libpjsip-ua +libpjsip +libresample +librt +libspeex +libsrtp +libpjsua))
-$(eval $(call PJSIPpackage,libresample,libresample,))
+$(eval $(call PJSIPpackage,libpjsip-simple,libpjsip-simple,+libpj +libpjlib-util +libpjsip +librt))
+$(eval $(call PJSIPpackage,libpjsip-ua,libpjsip-ua,+libpj +libpjlib-util +libpjmedia +libpjsip-simple +libpjsip +librt))
+$(eval $(call PJSIPpackage,libpjsip,libpjsip,+libpj +libpjlib-util +librt +libsrtp))
+$(eval $(call PJSIPpackage,libpjsua,libpjsua,+libpj +libpjlib-util +libpjmedia +libpjnath +libpjsip-simple +libpjsip-ua +libpjsip +librt))
+$(eval $(call PJSIPpackage,libpjsua2,libpjsua2,+libpj +libpjlib-util +libpjmedia +libpjnath +libpjsip-simple +libpjsip-ua +libpjsip +librt +libpjsua))
