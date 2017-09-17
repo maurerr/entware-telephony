@@ -146,6 +146,7 @@ endef
 define Package/$(PKG_NAME)-scripts-perl/install
 	$(INSTALL_DIR) $(1)/usr/share/yate/scripts
 	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/share/yate/scripts/Yate.pm $(1)/usr/share/yate/scripts/
+	$(INSTALL_BIN) ./files/banbrutes.pl $(1)/usr/share/yate/scripts/
 endef
 
 define Package/$(PKG_NAME)-sounds/install
@@ -223,7 +224,7 @@ $(eval $(call BuildPlugin,dbwave,server,Wav Media for DB Storage,+$(PKG_NAME)-mo
 $(eval $(call BuildPlugin,dumbchan,,Dummy Channel,))
 $(eval $(call BuildPlugin,enumroute,,ENUM Routing,))
 $(eval $(call BuildPlugin,eventlogs,server,Write events and alarms to log files,))
-$(eval $(call BuildPlugin,extmodule,,External Module Handler,))
+$(eval $(call BuildPlugin,extmodule,,External Module Handler,,/usr/share/yate/scripts/echo.sh))
 $(eval $(call BuildPlugin,faxchan,,Spandsp Fax Channel,+libspandsp))
 $(eval $(call BuildPlugin,filetransfer,,File Transfer Driver,))
 $(eval $(call BuildPlugin,gvoice,,Google Voice support,))
