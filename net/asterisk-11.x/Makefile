@@ -5,6 +5,7 @@
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
+# postgresql/host dependency added or pg_config will not be found
 
 include $(TOPDIR)/rules.mk
 
@@ -17,7 +18,7 @@ PKG_SOURCE_URL:=http://downloads.asterisk.org/pub/telephony/asterisk/releases/
 PKG_HASH:=59fd3735546cb56bda15f39caf34636c113e68b79019554a007ad63cb6fc2d33
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/asterisk-$(PKG_VERSION)
-PKG_BUILD_DEPENDS:=libxml2/host
+PKG_BUILD_DEPENDS:=libxml2/host postgresql/host
 
 PKG_LICENSE:=GPL-2.0
 PKG_LICENSE_FILES:=COPYING LICENSE
@@ -285,12 +286,13 @@ CONFIGURE_ARGS+= \
 	--disable-xmldoc
 
 CONFIGURE_VARS += \
-	ac_cv_path_ac_pt_CONFIG_LIBXML2=$(STAGING_DIR)/host/bin/xml2-config
+	ac_cv_path_ac_pt_CONFIG_LIBXML2=$(STAGING_DIR)/host/bin/xml2-config \
+	ac_cv_path_PG_CONFIG=$(STAGING_DIR)/opt/bin/pg_config \
 
 AST_MENUSELECT_OPTS = \
 	--without-newt \
 	--without-curses \
-	--with-libxml2="$(STAGING_DIR_HOSTPKG)"
+	--with-libxml2="$(STAGING_DIR_HOSTPKG)/opt"
 
 #define Build/Prepare
 #	$(call Build/Prepare/Default)
