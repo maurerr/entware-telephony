@@ -4,17 +4,18 @@
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
+# asterisk-11.x
 
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=asterisk-chan-dongle
-PKG_VERSION:=1.1-20170724
-PKG_RELEASE:=1
+PKG_VERSION:=1.1-20170913
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
-PKG_SOURCE_URL:=git://github.com/wdoekes/asterisk-chan-dongle.git
+PKG_SOURCE_URL:=https://github.com/wdoekes/asterisk-chan-dongle.git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_VERSION:=1e452f7598266be0970cec582ba32dbc5568868d
+PKG_SOURCE_VERSION:=4ef5ad7eea7245a031101875be08b924aa1e151b
 PKG_SOURCE_PROTO:=git
 
 PKG_FIXUP:=autoreconf
@@ -48,12 +49,19 @@ $(call Package/asterisk-chan-dongle/Default)
   VARIANT:=asterisk13
 endef
 
+define Package/asterisk15-chan-dongle
+$(call Package/asterisk-chan-dongle/Default)
+  DEPENDS+=asterisk15
+  VARIANT:=asterisk15
+endef
+
 define Package/description/Default
  Asterisk channel driver for Huawei UMTS 3G dongle.
 endef
 
 Package/asterisk11-chan-dongle/description = $(Package/description/Default)
 Package/asterisk13-chan-dongle/description = $(Package/description/Default)
+Package/asterisk15-chan-dongle/description = $(Package/description/Default)
 
 ifeq ($(BUILD_VARIANT),asterisk11)
   CHAN_DONGLE_AST_HEADERS:=$(STAGING_DIR)/opt/include/asterisk-11/include
@@ -65,6 +73,12 @@ ifeq ($(BUILD_VARIANT),asterisk13)
   CHAN_DONGLE_AST_HEADERS:=$(STAGING_DIR)/opt/include/asterisk-13/include
   CONFIGURE_ARGS+= \
 	  --with-astversion=13
+endif
+
+ifeq ($(BUILD_VARIANT),asterisk15)
+  CHAN_DONGLE_AST_HEADERS:=$(STAGING_DIR)/opt/include/asterisk-15/include
+  CONFIGURE_ARGS+= \
+	  --with-astversion=15
 endif
 
 CONFIGURE_ARGS+= \
@@ -112,6 +126,7 @@ endef
 
 Package/asterisk11-chan-dongle/conffiles = $(Package/conffiles/Default)
 Package/asterisk13-chan-dongle/conffiles = $(Package/conffiles/Default)
+Package/asterisk15-chan-dongle/conffiles = $(Package/conffiles/Default)
 
 define Package/Install/Default
 	$(INSTALL_DIR) $(1)/opt/etc/asterisk
@@ -122,6 +137,8 @@ endef
 
 Package/asterisk11-chan-dongle/install = $(Package/Install/Default)
 Package/asterisk13-chan-dongle/install = $(Package/Install/Default)
+Package/asterisk15-chan-dongle/install = $(Package/Install/Default)
 
 $(eval $(call BuildPackage,asterisk11-chan-dongle))
 #$(eval $(call BuildPackage,asterisk13-chan-dongle))
+#$(eval $(call BuildPackage,asterisk15-chan-dongle))
