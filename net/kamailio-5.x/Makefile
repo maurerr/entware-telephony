@@ -9,12 +9,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=kamailio5
-PKG_VERSION:=5.0.2
-PKG_RELEASE:=1
+PKG_VERSION:=5.0.4
+PKG_RELEASE:=2
 
-PKG_SOURCE_URL:=http://www.kamailio.org/pub/kamailio/$(PKG_VERSION)/src/
+PKG_SOURCE_URL:=https://www.kamailio.org/pub/kamailio/$(PKG_VERSION)/src
 PKG_SOURCE:=kamailio-$(PKG_VERSION)$(PKG_VARIANT)_src.tar.gz
-PKG_HASH:=
+PKG_HASH:=71f1b560721f9c2bed9f7cbd3b4c08d8defd2daa8fd28ce55d3938781a654a13
 PKG_USE_MIPS16:=0
 
 PKG_LICENSE:=GPL-2.0+
@@ -24,7 +24,7 @@ PKG_MAINTAINER:=Jiri Slachta <jiri@slachta.eu>
 include $(INCLUDE_DIR)/nls.mk
 include $(INCLUDE_DIR)/package.mk
 
-TARGET_CFLAGS += $(FPIC)
+TARGET_CFLAGS += $(FPIC) -DVERSION_NODATE=1
 PREBUILT_STAMP=$(STAGING_DIR)/stamp/.$(PKG_NAME)_prebuilt
 TAR_CMD:=$(HOST_TAR) -C $(PKG_BUILD_DIR) --strip-components 1 $(TAR_OPTIONS)
 
