@@ -8,13 +8,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libsrtp2
-PKG_VERSION:=2.0.0
+PKG_VERSION:=2.1.0
 PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=git://github.com/cisco/libsrtp.git
+PKG_SOURCE_URL:=https://github.com/cisco/libsrtp.git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_VERSION:=12ea269db3e4e9af7ce5de524fe07312fa6e035b
+PKG_SOURCE_VERSION:=93aba3e767502343c255fad8962dbf0ff29c4ca6
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -55,8 +55,8 @@ endef
 
 define Package/libsrtp2/install
 	$(INSTALL_DIR) $(1)/opt/lib
-	$(INSTALL_BIN) \
-		$(PKG_INSTALL_DIR)/opt/lib/libsrtp2.so.* \
+	$(CP) \
+		$(PKG_INSTALL_DIR)/opt/lib/libsrtp2.so* \
 		$(1)/opt/lib/
 endef
 
