@@ -15,27 +15,9 @@ ASTERISK-24515 #close
 ASTERISK-24517 #close
 
 Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
----
- apps/app_externalivr.c      | 119 ++++---
- channels/chan_sip.c         |  61 ++--
- configure.ac                |   4 -
- include/asterisk/iostream.h | 118 +++++++
- include/asterisk/tcptls.h   |  92 +-----
- main/http.c                 | 109 ++-----
- main/iostream.c             | 553 ++++++++++++++++++++++++++++++++
- main/manager.c              | 137 ++++----
- main/tcptls.c               | 767 ++++++--------------------------------------
- main/utils.c                |  68 ----
- res/res_http_post.c         |  10 +-
- res/res_http_websocket.c    | 116 +++----
- res/res_phoneprov.c         |   2 +-
- 13 files changed, 993 insertions(+), 1163 deletions(-)
- create mode 100644 include/asterisk/iostream.h
- create mode 100644 main/iostream.c
-
 --- a/apps/app_externalivr.c
 +++ b/apps/app_externalivr.c
-@@ -152,10 +152,12 @@ struct gen_state {
+@@ -152,10 +152,12 @@
  };
  
  static int eivr_comm(struct ast_channel *chan, struct ivr_localuser *u, 
@@ -50,7 +32,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	const struct ast_channel *chan)
  {
  	struct ast_str *tmp = ast_str_create(12);
-@@ -164,9 +166,11 @@ static void send_eivr_event(FILE *handle
+@@ -164,9 +166,11 @@
  	if (data) {
  		ast_str_append(&tmp, 0, ",%s", data);
  	}
@@ -64,7 +46,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	ast_free(tmp);
  }
  
-@@ -395,6 +399,8 @@ static int app_exec(struct ast_channel *
+@@ -395,6 +399,8 @@
  	int child_stdin[2] = { -1, -1 };
  	int child_stdout[2] = { -1, -1 };
  	int child_stderr[2] = { -1, -1 };
@@ -73,7 +55,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	int res = -1;
  	int pid;
  
-@@ -526,7 +532,7 @@ static int app_exec(struct ast_channel *
+@@ -526,7 +532,7 @@
  			goto exit;
  		}
  
@@ -82,7 +64,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  
  	} else {
  		if (pipe(child_stdin)) {
-@@ -568,7 +574,12 @@ static int app_exec(struct ast_channel *
+@@ -568,7 +574,12 @@
  			child_stdout[1] = -1;
  			close(child_stderr[1]);
  			child_stderr[1] = -1;
@@ -96,7 +78,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		}
  	}
  
-@@ -576,6 +587,15 @@ static int app_exec(struct ast_channel *
+@@ -576,6 +587,15 @@
  	if (u->gen_active) {
  		ast_deactivate_generator(chan);
  	}
@@ -112,7 +94,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	if (child_stdin[0] > -1) {
  		close(child_stdin[0]);
  	}
-@@ -604,46 +624,25 @@ static int app_exec(struct ast_channel *
+@@ -604,46 +624,25 @@
  }
  
  static int eivr_comm(struct ast_channel *chan, struct ivr_localuser *u, 
@@ -168,7 +150,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  
  	while (1) {
  		if (ast_test_flag(ast_channel_flags(chan), AST_FLAG_ZOMBIE)) {
-@@ -667,7 +666,7 @@ static int eivr_comm(struct ast_channel
+@@ -667,7 +666,7 @@
   		errno = 0;
   		exception = 0;
   
@@ -177,7 +159,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
   
   		if (ast_channel_state(chan) == AST_STATE_UP && !AST_LIST_EMPTY(&u->finishlist)) {
   			AST_LIST_LOCK(&u->finishlist);
-@@ -715,15 +714,18 @@ static int eivr_comm(struct ast_channel
+@@ -715,15 +714,18 @@
   				break;
   			}
   			ast_frfree(f);
@@ -201,7 +183,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  				continue;
  			}
  
-@@ -869,16 +871,18 @@ static int eivr_comm(struct ast_channel
+@@ -869,16 +871,18 @@
   				else
   					ast_chan_log(LOG_WARNING, chan, "Unknown option requested: %s\n", &input[2]);
   			}
@@ -226,7 +208,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
   		} else if ((ready_fd < 0) && ms) { 
   			if (errno == 0 || errno == EINTR)
   				continue;
-@@ -888,23 +892,7 @@ static int eivr_comm(struct ast_channel
+@@ -888,23 +892,7 @@
   		}
   	}
   
@@ -253,7 +235,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  static int unload_module(void)
 --- a/channels/chan_sip.c
 +++ b/channels/chan_sip.c
-@@ -2541,7 +2541,7 @@ static struct sip_threadinfo *sip_thread
+@@ -2541,7 +2541,7 @@
  	}
  	ao2_t_ref(tcptls_session, +1, "tcptls_session ref for sip_threadinfo object");
  	th->tcptls_session = tcptls_session;
@@ -262,7 +244,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	ao2_t_link(threadt, th, "Adding new tcptls helper thread");
  	ao2_t_ref(th, -1, "Decrementing threadinfo ref from alloc, only table ref remains");
  	return th;
-@@ -2564,8 +2564,7 @@ static int sip_tcptls_write(struct ast_t
+@@ -2564,8 +2564,7 @@
  
  	ao2_lock(tcptls_session);
  
@@ -272,7 +254,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		!(packet = ao2_alloc(sizeof(*packet), tcptls_packet_destructor)) ||
  		!(packet->data = ast_str_create(len))) {
  		goto tcptls_write_setup_error;
-@@ -2878,7 +2877,7 @@ static int sip_tcptls_read(struct sip_re
+@@ -2878,7 +2877,7 @@
  			} else {
  				timeout = -1;
  			}
@@ -281,7 +263,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  			if (res < 0) {
  				ast_debug(2, "SIP TCP/TLS server :: ast_wait_for_input returned %d\n", res);
  				return -1;
-@@ -2887,7 +2886,7 @@ static int sip_tcptls_read(struct sip_re
+@@ -2887,7 +2886,7 @@
  				return -1;
  			}
  
@@ -290,7 +272,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  			if (res < 0) {
  				if (errno == EAGAIN || errno == EINTR) {
  					continue;
-@@ -2948,18 +2947,8 @@ static void *_sip_tcp_helper_thread(stru
+@@ -2948,18 +2947,8 @@
  			goto cleanup;
  		}
  
@@ -311,7 +293,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  			goto cleanup;
  		}
  		me->threadid = pthread_self();
-@@ -2982,15 +2971,15 @@ static void *_sip_tcp_helper_thread(stru
+@@ -2982,15 +2971,15 @@
  	}
  
  	flags = 1;
@@ -330,7 +312,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	fds[1].fd = me->alert_pipe[0];
  	fds[0].events = fds[1].events = POLLIN | POLLPRI;
  
-@@ -3010,9 +2999,9 @@ static void *_sip_tcp_helper_thread(stru
+@@ -3010,9 +2999,9 @@
  	 * We cannot let the stream exclusively wait for data to arrive.
  	 * We have to wake up the task to send outgoing messages.
  	 */
@@ -342,7 +324,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		tcptls_session->client ? -1 : (authtimeout * 1000));
  
  	for (;;) {
-@@ -3020,7 +3009,7 @@ static void *_sip_tcp_helper_thread(stru
+@@ -3020,7 +3009,7 @@
  
  		if (!tcptls_session->client && req.authenticated && !authenticated) {
  			authenticated = 1;
@@ -351,7 +333,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  			ast_atomic_fetchadd_int(&unauth_sessions, -1);
  		}
  
-@@ -3031,7 +3020,7 @@ static void *_sip_tcp_helper_thread(stru
+@@ -3031,7 +3020,7 @@
  			}
  
  			if (timeout == 0) {
@@ -360,7 +342,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  				goto cleanup;
  			}
  		} else {
-@@ -3041,11 +3030,11 @@ static void *_sip_tcp_helper_thread(stru
+@@ -3041,11 +3030,11 @@
  		if (ast_str_strlen(tcptls_session->overflow_buf) == 0) {
  			res = ast_poll(fds, 2, timeout); /* polls for both socket and alert_pipe */
  			if (res < 0) {
@@ -374,7 +356,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  				goto cleanup;
  			}
  		}
-@@ -3070,14 +3059,14 @@ static void *_sip_tcp_helper_thread(stru
+@@ -3070,14 +3059,14 @@
  
  			memset(buf, 0, sizeof(buf));
  
@@ -391,7 +373,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  
  			res = sip_tcptls_read(&req, tcptls_session, authenticated, start);
  			if (res < 0) {
-@@ -3111,7 +3100,7 @@ static void *_sip_tcp_helper_thread(stru
+@@ -3111,7 +3100,7 @@
  				ao2_unlock(me);
  
  				if (packet) {
@@ -400,7 +382,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  						ast_log(LOG_WARNING, "Failure to write to tcp/tls socket\n");
  					}
  					ao2_t_ref(packet, -1, "tcptls packet sent, this is no longer needed");
-@@ -3123,7 +3112,7 @@ static void *_sip_tcp_helper_thread(stru
+@@ -3123,7 +3112,7 @@
  		}
  	}
  
@@ -409,7 +391,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  
  cleanup:
  	if (tcptls_session && !tcptls_session->client && !authenticated) {
-@@ -29178,9 +29167,8 @@ static int sip_prepare_socket(struct sip
+@@ -29184,9 +29173,8 @@
  		return s->fd;
  	}
  	if ((s->type & (AST_TRANSPORT_TCP | AST_TRANSPORT_TLS)) &&
@@ -421,7 +403,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	}
  	if ((s->type & (AST_TRANSPORT_WS | AST_TRANSPORT_WSS))) {
  		return s->ws_session ? ast_websocket_fd(s->ws_session) : -1;
-@@ -29210,7 +29198,7 @@ static int sip_prepare_socket(struct sip
+@@ -29216,7 +29204,7 @@
  	/* 1.  check for existing threads */
  	ast_sockaddr_copy(&sa_tmp, sip_real_dst(p));
  	if ((tcptls_session = sip_tcp_locate(&sa_tmp))) {
@@ -430,7 +412,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		if (s->tcptls_session) {
  			ao2_ref(s->tcptls_session, -1);
  			s->tcptls_session = NULL;
-@@ -29268,7 +29256,7 @@ static int sip_prepare_socket(struct sip
+@@ -29274,7 +29262,7 @@
  		goto create_tcptls_session_fail;
  	}
  
@@ -439,7 +421,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  
  	/* client connections need to have the sip_threadinfo object created before
  	 * the thread is detached.  This ensures the alert_pipe is up before it will
-@@ -30070,8 +30058,7 @@ static int sip_send_keepalive(const void
+@@ -30076,8 +30064,7 @@
  	if ((peer->socket.fd != -1) && (peer->socket.type == AST_TRANSPORT_UDP)) {
  		res = ast_sendto(peer->socket.fd, keepalive, sizeof(keepalive), 0, &peer->addr);
  	} else if ((peer->socket.type & (AST_TRANSPORT_TCP | AST_TRANSPORT_TLS)) &&
@@ -451,7 +433,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		res = ast_sendto(sipsock, keepalive, sizeof(keepalive), 0, &peer->addr);
 --- a/configure.ac
 +++ b/configure.ac
-@@ -823,10 +823,6 @@ AC_ARG_ENABLE([asteriskssl],
+@@ -824,10 +824,6 @@
  	esac], [AST_ASTERISKSSL=yes])
  AC_SUBST(AST_ASTERISKSSL)
  
@@ -462,7 +444,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  AC_CHECK_FUNCS([inet_aton])
  
  # check if we have IP_PKTINFO constant defined
---- /dev/null
+--- a/include/asterisk/iostream.h
 +++ b/include/asterisk/iostream.h
 @@ -0,0 +1,118 @@
 +/*
@@ -607,7 +589,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  
  /*! SSL support */
  #define AST_CERTFILE "asterisk.pem"
-@@ -157,72 +144,10 @@ struct ast_tcptls_session_args {
+@@ -157,72 +144,10 @@
  	struct ast_tls_config *old_tls_cfg; /*!< copy of the SSL configuration to determine whether changes have been made */
  };
  
@@ -680,7 +662,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	int client;
  	struct ast_sockaddr remote_address;
  	struct ast_tcptls_session_args *parent;
-@@ -232,20 +157,12 @@ struct ast_tcptls_session_instance {
+@@ -232,20 +157,12 @@
  	 * extra data.
  	 */
  	struct ast_str *overflow_buf;
@@ -703,7 +685,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  /*! 
    * \brief attempts to connect and start tcptls session, on error the tcptls_session's
    * ref count is decremented, fd and file are closed, and NULL is returned.
-@@ -301,7 +218,4 @@ void ast_ssl_teardown(struct ast_tls_con
+@@ -301,7 +218,4 @@
   */
  int ast_tls_read_conf(struct ast_tls_config *tls_cfg, struct ast_tcptls_session_args *tls_desc, const char *varname, const char *value);
  
@@ -713,88 +695,38 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  #endif /* _ASTERISK_TCPTLS_H */
 --- a/main/http.c
 +++ b/main/http.c
-@@ -451,11 +451,14 @@ void ast_http_send(struct ast_tcptls_ses
- 	struct timeval now = ast_tvnow();
- 	struct ast_tm tm;
- 	char timebuf[80];
-+	char buf[256];
-+	int len;
- 	int content_length = 0;
- 	int close_connection;
+@@ -458,7 +458,7 @@
  	struct ast_str *server_header_field = ast_str_create(MAX_SERVER_NAME_LENGTH);
-+	int send_content;
+ 	int send_content;
  
 -	if (!ser || !ser->f || !server_header_field) {
 +	if (!ser || !server_header_field) {
  		/* The connection is not open. */
  		ast_free(http_header);
  		ast_free(out);
-@@ -504,8 +507,10 @@ void ast_http_send(struct ast_tcptls_ses
- 		lseek(fd, 0, SEEK_SET);
- 	}
+@@ -510,7 +510,7 @@
+ 	send_content = method != AST_HTTP_HEAD || status_code >= 400;
  
-+	send_content = method != AST_HTTP_HEAD || status_code >= 400;
-+
  	/* send http header */
--	fprintf(ser->f,
-+	ast_iostream_printf(ser->stream,
+-	if (fprintf(ser->f,
++	if (ast_iostream_printf(ser->stream,
  		"HTTP/1.1 %d %s\r\n"
  		"%s"
  		"Date: %s\r\n"
-@@ -513,43 +518,25 @@ void ast_http_send(struct ast_tcptls_ses
- 		"%s"
- 		"%s"
- 		"Content-Length: %d\r\n"
--		"\r\n",
-+		"\r\n"
-+		"%s",
- 		status_code, status_title ? status_title : "OK",
- 		ast_str_buffer(server_header_field),
- 		timebuf,
- 		close_connection ? "Connection: close\r\n" : "",
- 		static_content ? "" : "Cache-Control: no-cache, no-store\r\n",
- 		http_header ? ast_str_buffer(http_header) : "",
--		content_length
-+		content_length,
-+		send_content && out && ast_str_strlen(out) ? ast_str_buffer(out) : ""
- 		);
- 
- 	/* send content */
--	if (method != AST_HTTP_HEAD || status_code >= 400) {
--		if (out && ast_str_strlen(out)) {
+@@ -534,11 +534,7 @@
+ 	} else if (send_content && fd) {
+ 		/* send file content */
+ 		while ((len = read(fd, buf, sizeof(buf))) > 0) {
 -			/*
 -			 * NOTE: Because ser->f is a non-standard FILE *, fwrite() will probably not
 -			 * behave exactly as documented.
 -			 */
--			if (fwrite(ast_str_buffer(out), ast_str_strlen(out), 1, ser->f) != 1) {
--				ast_log(LOG_ERROR, "fwrite() failed: %s\n", strerror(errno));
-+	if (send_content && fd) {
-+		while ((len = read(fd, buf, sizeof(buf))) > 0) {
+-			if (fwrite(buf, len, 1, ser->f) != 1) {
 +			if (ast_iostream_write(ser->stream, buf, len) != len) {
-+				ast_log(LOG_WARNING, "fwrite() failed: %s\n", strerror(errno));
+ 				ast_debug(1, "fwrite() failed: %s\n", strerror(errno));
  				close_connection = 1;
--			}
--		}
--
--		if (fd) {
--			char buf[256];
--			int len;
--
--			while ((len = read(fd, buf, sizeof(buf))) > 0) {
--				/*
--				 * NOTE: Because ser->f is a non-standard FILE *, fwrite() will probably not
--				 * behave exactly as documented.
--				 */
--				if (fwrite(buf, len, 1, ser->f) != 1) {
--					ast_log(LOG_WARNING, "fwrite() failed: %s\n", strerror(errno));
--					close_connection = 1;
--					break;
--				}
-+				break;
- 			}
- 		}
- 	}
-@@ -577,7 +564,7 @@ void ast_http_create_response(struct ast
+ 				break;
+@@ -569,7 +565,7 @@
  		ast_free(http_header_data);
  		ast_free(server_address);
  		ast_free(out);
@@ -803,7 +735,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  			ast_debug(1, "HTTP closing session. OOM.\n");
  			ast_tcptls_close_session_file(ser);
  		}
-@@ -931,14 +918,9 @@ static int http_body_read_contents(struc
+@@ -923,14 +919,9 @@
  {
  	int res;
  
@@ -821,7 +753,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		ast_log(LOG_WARNING, "Short HTTP request %s (Wanted %d)\n",
  			what_getting, length);
  		return -1;
-@@ -960,28 +942,12 @@ static int http_body_read_contents(struc
+@@ -952,28 +943,12 @@
   */
  static int http_body_discard_contents(struct ast_tcptls_session_instance *ser, int length, const char *what_getting)
  {
@@ -855,7 +787,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		return -1;
  	}
  	return 0;
-@@ -1057,7 +1023,7 @@ static int http_body_get_chunk_length(st
+@@ -1049,7 +1024,7 @@
  	char header_line[MAX_HTTP_LINE_LENGTH];
  
  	/* get the line of hexadecimal giving chunk-size w/ optional chunk-extension */
@@ -864,7 +796,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		ast_log(LOG_WARNING, "Short HTTP read of chunked header\n");
  		return -1;
  	}
-@@ -1090,8 +1056,8 @@ static int http_body_check_chunk_sync(st
+@@ -1082,8 +1057,8 @@
  	 */
  
  	/* Stay in fread until get the expected CRLF or timeout. */
@@ -875,7 +807,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		ast_log(LOG_WARNING, "Short HTTP chunk sync read (Wanted %zu)\n",
  			sizeof(chunk_sync));
  		return -1;
-@@ -1120,7 +1086,7 @@ static int http_body_discard_chunk_trail
+@@ -1112,7 +1087,7 @@
  	char header_line[MAX_HTTP_LINE_LENGTH];
  
  	for (;;) {
@@ -884,7 +816,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  			ast_log(LOG_WARNING, "Short HTTP read of chunked trailer header\n");
  			return -1;
  		}
-@@ -1783,7 +1749,7 @@ static int http_request_headers_get(stru
+@@ -1775,7 +1750,7 @@
  		char *name;
  		char *value;
  
@@ -893,7 +825,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  			ast_http_error(ser, 400, "Bad Request", "Timeout");
  			return -1;
  		}
-@@ -1857,7 +1823,7 @@ static int httpd_process_request(struct
+@@ -1849,7 +1824,7 @@
  	int res;
  	char request_line[MAX_HTTP_LINE_LENGTH];
  
@@ -902,7 +834,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		return -1;
  	}
  
-@@ -1941,7 +1907,7 @@ static void *httpd_helper_thread(void *d
+@@ -1933,7 +1908,7 @@
  	int flags = 1;
  	int timeout;
  
@@ -911,7 +843,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		ao2_cleanup(ser);
  		return NULL;
  	}
-@@ -1958,14 +1924,11 @@ static void *httpd_helper_thread(void *d
+@@ -1950,14 +1925,11 @@
  	 * This is necessary to prevent delays (caused by buffering) as we
  	 * write to the socket in bits and pieces.
  	 */
@@ -929,7 +861,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  
  	/* Setup HTTP worker private data to keep track of request body reading. */
  	ao2_cleanup(ser->private_data);
-@@ -1988,23 +1951,17 @@ static void *httpd_helper_thread(void *d
+@@ -1980,23 +1952,17 @@
  	}
  
  	/* We can let the stream wait for data to arrive. */
@@ -959,7 +891,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  			break;
  		}
  
-@@ -2018,10 +1975,9 @@ static void *httpd_helper_thread(void *d
+@@ -2010,10 +1976,9 @@
  done:
  	ast_atomic_fetchadd_int(&session_count, -1);
  
@@ -973,7 +905,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	ao2_ref(ser, -1);
  	return NULL;
  }
---- /dev/null
+--- a/main/iostream.c
 +++ b/main/iostream.c
 @@ -0,0 +1,604 @@
 +/*
@@ -1582,7 +1514,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
 +}
 --- a/main/manager.c
 +++ b/main/manager.c
-@@ -1543,8 +1543,7 @@ static void acl_change_stasis_unsubscrib
+@@ -1562,8 +1562,7 @@
  struct mansession_session {
  				/*! \todo XXX need to document which fields it is protecting */
  	struct ast_sockaddr addr;	/*!< address we are connecting from */
@@ -1592,7 +1524,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	int inuse;		/*!< number of HTTP sessions using this entry */
  	int needdestroy;	/*!< Whether an HTTP session should be destroyed */
  	pthread_t waiting_thread;	/*!< Sleeping thread using this descriptor */
-@@ -1586,9 +1585,8 @@ enum mansession_message_parsing {
+@@ -1605,9 +1604,8 @@
   */
  struct mansession {
  	struct mansession_session *session;
@@ -1603,7 +1535,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	enum mansession_message_parsing parsing;
  	int write_error:1;
  	struct manager_custom_hook *hook;
-@@ -2160,10 +2158,6 @@ static void session_destructor(void *obj
+@@ -2179,10 +2177,6 @@
  		ast_datastore_free(datastore);
  	}
  
@@ -1614,7 +1546,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	if (eqe) {
  		ast_atomic_fetchadd_int(&eqe->usecount, -1);
  	}
-@@ -2198,7 +2192,6 @@ static struct mansession_session *build_
+@@ -2217,7 +2211,6 @@
  		return NULL;
  	}
  
@@ -1622,7 +1554,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	newsession->waiting_thread = AST_PTHREADT_NULL;
  	newsession->writetimeout = 100;
  	newsession->send_events = -1;
-@@ -2611,7 +2604,7 @@ static char *handle_showmanconn(struct a
+@@ -2630,7 +2623,7 @@
  				ast_sockaddr_stringify_addr(&session->addr),
  				(int) (session->sessionstart),
  				(int) (now - session->sessionstart),
@@ -1631,7 +1563,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  				session->inuse,
  				session->readperm,
  				session->writeperm);
-@@ -2883,7 +2876,6 @@ int ast_hook_send_action(struct manager_
+@@ -2902,7 +2895,6 @@
  			 * This is necessary to meet the previous design of manager.c
  			 */
  			s.hook = hook;
@@ -1639,7 +1571,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  
  			ao2_lock(act_found);
  			if (act_found->registered && act_found->func) {
-@@ -2914,9 +2906,8 @@ int ast_hook_send_action(struct manager_
+@@ -2933,9 +2925,8 @@
   */
  static int send_string(struct mansession *s, char *string)
  {
@@ -1651,7 +1583,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  
  	/* It's a result from one of the hook's action invocation */
  	if (s->hook) {
-@@ -2928,7 +2919,12 @@ static int send_string(struct mansession
+@@ -2947,7 +2938,12 @@
  		return 0;
  	}
  
@@ -1665,7 +1597,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		s->write_error = 1;
  	}
  
-@@ -2969,10 +2965,10 @@ void astman_append(struct mansession *s,
+@@ -2988,10 +2984,10 @@
  		return;
  	}
  
@@ -1678,7 +1610,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	}
  }
  
-@@ -4113,7 +4109,7 @@ static int action_waitevent(struct manse
+@@ -4132,7 +4128,7 @@
  			break;
  		}
  		if (s->session->managerid == 0) {	/* AMI session */
@@ -1687,7 +1619,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  				break;
  			}
  		} else {	/* HTTP session */
-@@ -5896,7 +5892,7 @@ static int process_events(struct mansess
+@@ -5956,7 +5952,7 @@
  	int ret = 0;
  
  	ao2_lock(s->session);
@@ -1696,7 +1628,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		struct eventqent *eqe = s->session->last_ev;
  
  		while ((eqe = advance_event(eqe))) {
-@@ -6436,7 +6432,7 @@ static int get_input(struct mansession *
+@@ -6496,7 +6492,7 @@
  		s->session->waiting_thread = pthread_self();
  		ao2_unlock(s->session);
  
@@ -1705,7 +1637,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  
  		ao2_lock(s->session);
  		s->session->waiting_thread = AST_PTHREADT_NULL;
-@@ -6454,13 +6450,7 @@ static int get_input(struct mansession *
+@@ -6514,13 +6510,7 @@
  	}
  
  	ao2_lock(s->session);
@@ -1720,7 +1652,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	if (res < 1) {
  		res = -1;	/* error return */
  	} else {
-@@ -6598,7 +6588,7 @@ static void *session_do(void *data)
+@@ -6658,7 +6648,7 @@
  	struct ast_sockaddr ser_remote_address_tmp;
  
  	if (ast_atomic_fetchadd_int(&unauth_sessions, +1) >= authlimit) {
@@ -1729,7 +1661,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		ast_atomic_fetchadd_int(&unauth_sessions, -1);
  		goto done;
  	}
-@@ -6607,7 +6597,7 @@ static void *session_do(void *data)
+@@ -6667,7 +6657,7 @@
  	session = build_mansession(&ser_remote_address_tmp);
  
  	if (session == NULL) {
@@ -1738,7 +1670,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		ast_atomic_fetchadd_int(&unauth_sessions, -1);
  		goto done;
  	}
-@@ -6615,14 +6605,10 @@ static void *session_do(void *data)
+@@ -6675,14 +6665,10 @@
  	/* here we set TCP_NODELAY on the socket to disable Nagle's algorithm.
  	 * This is necessary to prevent delays (caused by buffering) as we
  	 * write to the socket in bits and pieces. */
@@ -1755,7 +1687,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  
  	ao2_lock(session);
  	/* Hook to the tail of the event queue */
-@@ -6631,8 +6617,7 @@ static void *session_do(void *data)
+@@ -6691,8 +6677,7 @@
  	ast_mutex_init(&s.lock);
  
  	/* these fields duplicate those in the 'ser' structure */
@@ -1765,7 +1697,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	ast_sockaddr_copy(&session->addr, &ser_remote_address_tmp);
  	s.session = session;
  
-@@ -6651,9 +6636,9 @@ static void *session_do(void *data)
+@@ -6711,9 +6696,9 @@
  	 * We cannot let the stream exclusively wait for data to arrive.
  	 * We have to wake up the task to send async events.
  	 */
@@ -1777,7 +1709,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		ast_tvnow(), authtimeout * 1000);
  
  	astman_append(&s, "Asterisk Call Manager/%s\r\n", AMI_VERSION);	/* welcome prompt */
-@@ -6662,7 +6647,7 @@ static void *session_do(void *data)
+@@ -6722,7 +6707,7 @@
  			break;
  		}
  		if (session->authenticated) {
@@ -1786,7 +1718,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		}
  	}
  	/* session is over, explain why and terminate */
-@@ -7522,23 +7507,9 @@ static void xml_translate(struct ast_str
+@@ -7582,23 +7567,9 @@
  
  static void close_mansession_file(struct mansession *s)
  {
@@ -1813,7 +1745,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	} else {
  		ast_log(LOG_ERROR, "Attempted to close file/file descriptor on mansession without a valid file or file descriptor.\n");
  	}
-@@ -7547,17 +7518,20 @@ static void close_mansession_file(struct
+@@ -7607,17 +7578,20 @@
  static void process_output(struct mansession *s, struct ast_str **out, struct ast_variable *params, enum output_format format)
  {
  	char *buf;
@@ -1840,7 +1772,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  			ast_log(LOG_WARNING, "mmap failed.  Manager output was not processed\n");
  		} else {
  			if (format == FORMAT_XML || format == FORMAT_HTML) {
-@@ -7584,6 +7558,7 @@ static int generic_http_callback(struct
+@@ -7644,6 +7618,7 @@
  	struct mansession s = { .session = NULL, .tcptls_session = ser };
  	struct mansession_session *session = NULL;
  	uint32_t ident;
@@ -1848,7 +1780,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	int blastaway = 0;
  	struct ast_variable *v;
  	struct ast_variable *params = get_params;
-@@ -7639,17 +7614,17 @@ static int generic_http_callback(struct
+@@ -7699,17 +7674,17 @@
  	}
  
  	s.session = session;
@@ -1871,7 +1803,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		goto generic_callback_out;
  	}
  
-@@ -7789,9 +7764,9 @@ generic_callback_out:
+@@ -7849,9 +7824,9 @@
  		if (blastaway) {
  			session_destroy(session);
  		} else {
@@ -1884,7 +1816,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  			}
  			unref_mansession(session);
  		}
-@@ -7816,6 +7791,7 @@ static int auth_http_callback(struct ast
+@@ -7876,6 +7851,7 @@
  	struct message m = { 0 };
  	unsigned int idx;
  	size_t hdrlen;
@@ -1892,7 +1824,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  
  	time_t time_now = time(NULL);
  	unsigned long nonce = 0, nc;
-@@ -7994,17 +7970,17 @@ static int auth_http_callback(struct ast
+@@ -8054,17 +8030,17 @@
  
  	ast_mutex_init(&s.lock);
  	s.session = session;
@@ -1915,7 +1847,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		goto auth_callback_out;
  	}
  
-@@ -8055,7 +8031,7 @@ static int auth_http_callback(struct ast
+@@ -8115,7 +8091,7 @@
  		m.headers[idx] = NULL;
  	}
  
@@ -1924,7 +1856,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  
  	http_header = ast_str_create(80);
  	out = ast_str_create(result_size * 2 + 512);
-@@ -8107,11 +8083,10 @@ auth_callback_out:
+@@ -8167,11 +8143,10 @@
  	ast_free(out);
  
  	ao2_lock(session);
@@ -1941,7 +1873,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	if (session->needdestroy) {
 --- a/main/tcptls.c
 +++ b/main/tcptls.c
-@@ -52,559 +52,13 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+@@ -52,559 +52,13 @@
  #include "asterisk/pbx.h"
  #include "asterisk/app.h"
  
@@ -2504,7 +2436,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	}
  	ast_free(i->overflow_buf);
  	ao2_cleanup(i->private_data);
-@@ -650,8 +104,7 @@ static void *handle_tcptls_connection(vo
+@@ -649,8 +103,7 @@
  {
  	struct ast_tcptls_session_instance *tcptls_session = data;
  #ifdef DO_SSL
@@ -2514,7 +2446,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  #endif
  
  	/* TCP/TLS connections are associated with external protocols, and
-@@ -666,127 +119,94 @@ static void *handle_tcptls_connection(vo
+@@ -665,127 +118,94 @@
  		return NULL;
  	}
  
@@ -2712,7 +2644,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	}
  
  	if (tcptls_session->parent->worker_fn) {
-@@ -845,7 +265,13 @@ void *ast_tcptls_server_root(void *data)
+@@ -844,7 +264,13 @@
  		}
  		flags = fcntl(fd, F_GETFL);
  		fcntl(fd, F_SETFL, flags & ~O_NONBLOCK);
@@ -2727,7 +2659,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		tcptls_session->parent = desc;
  		ast_sockaddr_copy(&tcptls_session->remote_address, &addr);
  
-@@ -1094,7 +520,7 @@ client_start_error:
+@@ -1093,7 +519,7 @@
  
  struct ast_tcptls_session_instance *ast_tcptls_client_create(struct ast_tcptls_session_args *desc)
  {
@@ -2736,7 +2668,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	struct ast_tcptls_session_instance *tcptls_session = NULL;
  
  	/* Do nothing if nothing has changed */
-@@ -1110,8 +536,8 @@ struct ast_tcptls_session_instance *ast_
+@@ -1109,8 +535,8 @@
  		close(desc->accept_fd);
  	}
  
@@ -2747,7 +2679,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	if (desc->accept_fd < 0) {
  		ast_log(LOG_ERROR, "Unable to allocate socket for %s: %s\n",
  			desc->name, strerror(errno));
-@@ -1141,7 +567,11 @@ struct ast_tcptls_session_instance *ast_
+@@ -1141,7 +567,11 @@
  		goto error;
  	}
  	tcptls_session->client = 1;
@@ -2760,7 +2692,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	tcptls_session->parent = desc;
  	tcptls_session->parent->worker_fn = NULL;
  	ast_sockaddr_copy(&tcptls_session->remote_address,
-@@ -1301,24 +731,9 @@ error:
+@@ -1301,24 +731,9 @@
  
  void ast_tcptls_close_session_file(struct ast_tcptls_session_instance *tcptls_session)
  {
@@ -2790,7 +2722,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	}
 --- a/main/utils.c
 +++ b/main/utils.c
-@@ -1437,74 +1437,6 @@ int ast_carefulwrite(int fd, char *s, in
+@@ -1437,74 +1437,6 @@
  	return res;
  }
  
@@ -2867,7 +2799,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	char *e;
 --- a/res/res_http_post.c
 +++ b/res/res_http_post.c
-@@ -213,7 +213,7 @@ static int find_sequence(char * inbuf, i
+@@ -224,7 +224,7 @@
  * This function has two modes.  The first to find a boundary marker.  The
  * second is to find the filename immediately after the boundary.
  */
@@ -2876,7 +2808,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  {
  	int find_filename = 0;
  	char buf[4096];
-@@ -224,7 +224,7 @@ static int readmimefile(FILE *fin, FILE
+@@ -235,7 +235,7 @@
  	int boundary_len;
  	char * path_end, * path_start, * filespec;
  
@@ -2885,7 +2817,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		return -1;
  	}
  
-@@ -238,8 +238,8 @@ static int readmimefile(FILE *fin, FILE
+@@ -249,8 +249,8 @@
  		}
  
  		if (0 < num_to_read) {
@@ -2896,7 +2828,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  				num_to_read = 0;
  			}
  			contentlen -= num_to_read;
-@@ -380,7 +380,7 @@ static int http_post_callback(struct ast
+@@ -391,7 +391,7 @@
  	 */
  	ast_http_body_read_status(ser, 0);
  
@@ -2907,7 +2839,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		ast_http_error(ser, 400, "Bad Request", "Cannot find boundary marker in POST request.");
 --- a/res/res_http_websocket.c
 +++ b/res/res_http_websocket.c
-@@ -87,8 +87,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+@@ -87,8 +87,7 @@
  
  /*! \brief Structure definition for session */
  struct ast_websocket {
@@ -2917,7 +2849,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	struct ast_sockaddr address;      /*!< Address of the remote client */
  	enum ast_websocket_opcode opcode; /*!< Cached opcode for multi-frame messages */
  	size_t payload_len;               /*!< Length of the payload */
-@@ -178,10 +177,11 @@ static void session_destroy_fn(void *obj
+@@ -178,10 +177,11 @@
  {
  	struct ast_websocket *session = obj;
  
@@ -2932,7 +2864,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  			ast_verb(2, "WebSocket connection %s '%s' closed\n", session->client ? "to" : "from",
  				ast_sockaddr_stringify(&session->address));
  		}
-@@ -307,20 +307,22 @@ int AST_OPTIONAL_API_NAME(ast_websocket_
+@@ -307,20 +307,22 @@
  	session->close_sent = 1;
  
  	ao2_lock(session);
@@ -2960,7 +2892,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  }
  
  static const char *opcode_map[] = {
-@@ -388,7 +390,8 @@ int AST_OPTIONAL_API_NAME(ast_websocket_
+@@ -388,7 +390,8 @@
  		return -1;
  	}
  
@@ -2970,7 +2902,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		ao2_unlock(session);
  		/* 1011 - server terminating connection due to not being able to fulfill the request */
  		ast_debug(1, "Closing WS with 1011 because we can't fulfill a write request\n");
-@@ -396,7 +399,7 @@ int AST_OPTIONAL_API_NAME(ast_websocket_
+@@ -396,7 +399,7 @@
  		return -1;
  	}
  
@@ -2979,7 +2911,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	ao2_unlock(session);
  
  	return 0;
-@@ -424,7 +427,7 @@ void AST_OPTIONAL_API_NAME(ast_websocket
+@@ -424,7 +427,7 @@
  
  int AST_OPTIONAL_API_NAME(ast_websocket_fd)(struct ast_websocket *session)
  {
@@ -2988,7 +2920,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  }
  
  struct ast_sockaddr * AST_OPTIONAL_API_NAME(ast_websocket_remote_address)(struct ast_websocket *session)
-@@ -439,18 +442,8 @@ int AST_OPTIONAL_API_NAME(ast_websocket_
+@@ -439,18 +442,8 @@
  
  int AST_OPTIONAL_API_NAME(ast_websocket_set_nonblock)(struct ast_websocket *session)
  {
@@ -3009,7 +2941,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	return 0;
  }
  
-@@ -491,23 +484,22 @@ int AST_OPTIONAL_API_NAME(ast_websocket_
+@@ -491,23 +484,22 @@
   */
  static inline int ws_safe_read(struct ast_websocket *session, char *buf, int len, enum ast_websocket_opcode *opcode)
  {
@@ -3038,7 +2970,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  				ast_log(LOG_WARNING, "Web socket closed abruptly\n");
  				*opcode = AST_WEBSOCKET_OPCODE_CLOSE;
  				session->closing = 1;
-@@ -515,7 +507,7 @@ static inline int ws_safe_read(struct as
+@@ -515,7 +507,7 @@
  				return -1;
  			}
  
@@ -3047,7 +2979,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  				ast_log(LOG_ERROR, "Error reading from web socket: %s\n", strerror(errno));
  				*opcode = AST_WEBSOCKET_OPCODE_CLOSE;
  				session->closing = 1;
-@@ -536,7 +528,7 @@ static inline int ws_safe_read(struct as
+@@ -536,7 +528,7 @@
  		if (!xlen) {
  			break;
  		}
@@ -3056,7 +2988,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  			ast_log(LOG_ERROR, "ast_wait_for_input returned err: %s\n", strerror(errno));
  			*opcode = AST_WEBSOCKET_OPCODE_CLOSE;
  			session->closing = 1;
-@@ -831,7 +823,7 @@ int AST_OPTIONAL_API_NAME(ast_websocket_
+@@ -831,7 +823,7 @@
  			ao2_ref(protocol_handler, -1);
  			return 0;
  		}
@@ -3065,7 +2997,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  
  		if (protocol_handler->session_attempted
  		    && protocol_handler->session_attempted(ser, get_vars, headers)) {
-@@ -852,7 +844,8 @@ int AST_OPTIONAL_API_NAME(ast_websocket_
+@@ -852,7 +844,8 @@
  		 *    Connection_.
  		 */
  		if (protocol) {
@@ -3075,7 +3007,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  				"Upgrade: %s\r\n"
  				"Connection: Upgrade\r\n"
  				"Sec-WebSocket-Accept: %s\r\n"
-@@ -861,15 +854,14 @@ int AST_OPTIONAL_API_NAME(ast_websocket_
+@@ -861,15 +854,14 @@
  				websocket_combine_key(key, base64, sizeof(base64)),
  				protocol);
  		} else {
@@ -3093,7 +3025,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  	} else {
  
  		/* Specification defined in http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-75 or completely unknown */
-@@ -881,7 +873,7 @@ int AST_OPTIONAL_API_NAME(ast_websocket_
+@@ -881,7 +873,7 @@
  	}
  
  	/* Enable keepalive on all sessions so the underlying user does not have to */
@@ -3102,7 +3034,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		ast_log(LOG_WARNING, "WebSocket connection from '%s' could not be accepted - failed to enable keepalive\n",
  			ast_sockaddr_stringify(&ser->remote_address));
  		websocket_bad_request(ser);
-@@ -893,25 +885,23 @@ int AST_OPTIONAL_API_NAME(ast_websocket_
+@@ -893,25 +885,23 @@
  	ast_verb(2, "WebSocket connection from '%s' for protocol '%s' accepted using version '%d'\n", ast_sockaddr_stringify(&ser->remote_address), protocol ? : "", version);
  
  	/* Populate the session with all the needed details */
@@ -3133,7 +3065,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  
  	return 0;
  }
-@@ -1245,7 +1235,7 @@ static enum ast_websocket_result websock
+@@ -1245,7 +1235,7 @@
  	int has_accept = 0;
  	int has_protocol = 0;
  
@@ -3142,7 +3074,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		ast_log(LOG_ERROR, "Unable to retrieve HTTP status line.");
  		return WS_BAD_STATUS;
  	}
-@@ -1258,7 +1248,7 @@ static enum ast_websocket_result websock
+@@ -1258,7 +1248,7 @@
  
  	/* Ignoring line folding - assuming header field values are contained
  	   within a single line */
@@ -3151,7 +3083,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		char *name, *value;
  		int parsed = ast_http_header_parse(buf, &name, &value);
  
-@@ -1311,19 +1301,19 @@ static enum ast_websocket_result websock
+@@ -1311,19 +1301,19 @@
  			client->protocols);
  	}
  
@@ -3184,7 +3116,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  		ast_log(LOG_ERROR, "Failed to send handshake.\n");
  		return WS_WRITE_ERROR;
  	}
-@@ -1347,9 +1337,9 @@ static enum ast_websocket_result websock
+@@ -1347,9 +1337,9 @@
  		return res;
  	}
  
@@ -3199,7 +3131,7 @@ Change-Id: Id916aef418b665ced6a7489aef74908b6e376e85
  }
 --- a/res/res_phoneprov.c
 +++ b/res/res_phoneprov.c
-@@ -950,7 +950,7 @@ static int phoneprov_callback(struct ast
+@@ -950,7 +950,7 @@
  			socklen_t namelen = sizeof(name.sa);
  			int res;
  
