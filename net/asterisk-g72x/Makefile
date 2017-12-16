@@ -70,7 +70,7 @@ CONFIGURE_ARGS+= \
 ifeq ($(BUILD_VARIANT),asterisk11)
 CONFIGURE_ARGS+= \
 	--with-asterisk-includes=$(STAGING_DIR)/opt/include/asterisk-11/include \
-	--with-asterisk110
+	--with-asterisk100
 endif
 
 ifeq ($(BUILD_VARIANT),asterisk13)
