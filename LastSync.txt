@@ -1,8 +1,8 @@
-commit 94b7a831afb434e8d26d638caf371f27fa6f06d4
-Merge: e437635 d3a784c
+commit 8c94c5d442b36dcfdc2f9fa578759008acad0e9c
+Merge: 94b7a83 23b3363
 Author: Jiri Slachta <jiri.slachta@gmail.com>
-Date:   Tue Dec 12 12:04:18 2017 +0100
+Date:   Thu Dec 14 08:33:32 2017 +0100
 
-    Merge pull request #225 from micmac1/baresip
+    Merge pull request #226 from micmac1/baresip
     
-    baresip: fix build failure on 32bit x86 targets
+    baresip/re: build fix and a workaround
