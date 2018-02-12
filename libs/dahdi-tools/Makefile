@@ -92,6 +92,6 @@ define Package/dahdi-tools-libtonezone/install
 	cd $(1)/usr/lib/; ln -s libtonezone.so.2.0.0 libtonezone.so; ln -s libtonezone.so.2.0.0 libtonezone.so.2
 endef
 
-$(eval $(call BuildPackage,dahdi-cfg))
-$(eval $(call BuildPackage,dahdi-monitor))
-$(eval $(call BuildPackage,dahdi-tools-libtonezone))
+#$(eval $(call BuildPackage,dahdi-cfg))
+#$(eval $(call BuildPackage,dahdi-monitor))
+#$(eval $(call BuildPackage,dahdi-tools-libtonezone))
