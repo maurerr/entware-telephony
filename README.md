@@ -1,5 +1,5 @@
 # entware-telephony
-https://github.com/openwrt/telephony modified for entware
+https://git.openwrt.org/feed/telephony modified for entware
 
 The original README.md:
 
@@ -26,4 +26,3 @@ This feed should be included and enabled by default in the OpenWrt buildroot. To
 ```
 
 The telephony packages should now appear in menuconfig.
-
