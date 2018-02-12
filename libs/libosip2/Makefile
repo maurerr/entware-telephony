@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libosip2
 PKG_VERSION:=5.0.0
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=@GNU/osip
@@ -37,7 +37,8 @@ define Package/libosip2/description
  GNU oSIP library, a Session Initiation Protocol (SIP) implementation.
 endef
 
-TARGET_CFLAGS += $(FPIC)
+# toolchain __arc__ define conflicts with libosip2 source
+TARGET_CFLAGS += $(FPIC) $(if $(CONFIG_arc),-U__arc__)
 
 CONFIGURE_ARGS += \
 	--enable-shared \
