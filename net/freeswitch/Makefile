@@ -8,15 +8,10 @@
 include $(TOPDIR)/rules.mk
 
 
-ifneq ($(PACKAGE_$(PKG_NAME)-mod-perl),)
-include $(TOPDIR)/feeds/packages/lang/perl/perlmod.mk
-endif
-
-
 PKG_NAME:=freeswitch
 PKG_SOURCE_PROTO:=git
 PKG_DISTNAME:=$(PKG_NAME)_$(PKG_SOURCE_PROTO)
-PKG_VERSION:=1.7.0
+PKG_VERSION:=1.9.0
 
 
 #
@@ -27,7 +22,7 @@ PKG_SOURCE_URL:=https://$(PKG_NAME).org/stash/scm/fs/$(PKG_NAME).git
 PATCH_DIR:=./patches/$(CONFIG_LIBC)
 
 
-FS_WITH_DEFAULT_HEAD:=cc0a062204cb51311619cd37f51b32b2f266729f
+FS_WITH_DEFAULT_HEAD:=77d0cfbf9e9a546b4eee23d9668cf44022f5d454
 FS_WITH_DEFAULT_HEAD_SHORT:=$(shell echo $(FS_WITH_DEFAULT_HEAD)|cut -b -7)
 PKG_SOURCE_VERSION:=$(if $(CONFIG_FS_WITH_LATEST_HEAD),$(shell git ls-remote $(PKG_SOURCE_URL) HEAD | cut -f1),$(FS_WITH_DEFAULT_HEAD))
 PKG_SOURCE_VERSION_SHORT:=$(shell echo $(PKG_SOURCE_VERSION)|cut -b -7)
@@ -40,8 +35,10 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_SOURCE_SUBDIR)
 TAR_OPTIONS+= --strip-components=1 -C $(PKG_BUILD_DIR)
 
 
+PKG_BUILD_DEPENDS:=swig/host
 PKG_FIXUP:=autoreconf
 PKG_BUILD_PARALLEL:=0
+PKG_USE_MIPS16:=0
 
 
 PKG_LICENSE:=MPL-1.1
@@ -231,7 +228,6 @@ PKG_CONFIG_DEPENDS:= \
 	CONFIG_FS_WITH_PYTHON \
 	CONFIG_FS_WITH_PYTHON_PATH \
 	CONFIG_FS_WITH_SILENT_RULES \
-	CONFIG_FS_WITH_SQLITE2 \
 	CONFIG_FS_WITH_SQLITE3 \
 	CONFIG_FS_WITH_SRTP \
 	CONFIG_FS_WITH_SRTP_GENERIC_AESICM \
@@ -244,8 +240,12 @@ PKG_CONFIG_DEPENDS:= \
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/nls.mk
+include $(TOPDIR)/feeds/packages/lang/perl/perlmod.mk
+
+
 ifneq ($(CONFIG_FS_WITH_PYTHON),)
-$(call include_mk, python3-package.mk)
+include $(TOPDIR)/feeds/packages/lang/python/python3-package.mk
+#$(call include_mk, python3-package.mk)
 endif
 
 
@@ -260,7 +260,7 @@ define Package/$(PKG_NAME)/Default
   CATEGORY:=Network
   SUBMENU:=Telephony
   URL:=http://www.$(PKG_NAME).org/
-  MAINTAINER:=Mazi Lo <openwrt.mazilo@recursor.net>
+  MAINTAINER:=Mazi Lo <openwrt.mazilo@xoxy.net>
 endef
 
 
@@ -268,7 +268,7 @@ define Package/$(PKG_NAME)
   $(call Package/$(PKG_NAME)/Default)
   MENU:=1
   TITLE:=FreeSWITCH open source telephony platform ($(PKG_SOURCE_VERSION_SHORT))
-  DEPENDS:=+FS_WITH_CORE_LIBEDIT_SUPPORT:libedit +FS_WITH_OPENSSL:libopenssl +libcurl +libdb47 +libfreetype +libgdbm $(ICONV_DEPENDS) $(INTL_DEPENDS) +libjpeg +libncurses +libopenldap +libpcre +libpng +libpthread +librt +libspeex +libspeexdsp +FS_WITH_SQLITE2:libsqlite2 +FS_WITH_SQLITE3:libsqlite3 +libsrtp +SSP_SUPPORT:libssp +libstdcpp +libuuid +PACKAGE_$(PKG_NAME)-mod-perl:perl
+  DEPENDS:=+FS_WITH_CORE_LIBEDIT_SUPPORT:libedit +FS_WITH_OPENSSL:libopenssl +libcurl +libdb47 +libfreetype +libgdbm $(ICONV_DEPENDS) $(INTL_DEPENDS) +libjpeg +libncurses +libopenldap +libpcre +libpng +libpthread +librt +libspeex +libspeexdsp +FS_WITH_SQLITE3:libsqlite3 +libsrtp +SSP_SUPPORT:libssp +libstdcpp +libuuid +PACKAGE_$(PKG_NAME)-mod-perl:perl
 endef
 
 
@@ -340,9 +340,7 @@ define Package/$(PKG_NAME)-collection-upstream-defaults
   $(call Package/$(PKG_NAME)/Default)
   TITLE:=FS upstream def sample conf
   DEPENDS:= $(PKG_NAME) \
-		+$(PKG_NAME)-config-upstream-defaults \
 		+$(PKG_NAME)-mod-callcenter \
-		+$(PKG_NAME)-mod-codec2 \
 		+$(PKG_NAME)-mod-commands \
 		+$(PKG_NAME)-mod-conference \
 		+$(PKG_NAME)-mod-curl \
@@ -354,7 +352,6 @@ define Package/$(PKG_NAME)-collection-upstream-defaults
 		+$(PKG_NAME)-mod-g729 \
 		+$(PKG_NAME)-mod-hash \
 		+$(PKG_NAME)-mod-http-cache \
-		+$(PKG_NAME)-mod-ilbc \
 		+$(PKG_NAME)-mod-local-stream \
 		+$(PKG_NAME)-mod-lua \
 		+$(PKG_NAME)-mod-native-file \
@@ -375,7 +372,6 @@ define Package/$(PKG_NAME)-collection-minimal
   DEFAULT:=y
   DEPENDS:= $(PKG_NAME) \
 		+$(PKG_NAME)-config-minimal \
-		+$(PKG_NAME)-mod-codec2 \
 		+$(PKG_NAME)-mod-commands \
 		+$(PKG_NAME)-mod-dialplan-xml \
 		+$(PKG_NAME)-mod-dptools \
@@ -595,7 +591,6 @@ CONFIGURE_ARGS+= \
 	$(call autoconf_bool,CONFIG_FS_WITH_APR_THREADS,threads) \
 	$(call autoconf_bool,CONFIG_FS_WITH_VISIBILITY,visibility) \
 	$(call autoconf_bool,CONFIG_PACKAGE_$(PKG_NAME)-mod-spandsp && CONFIG_FS_WITH_FIXED_POINT,fixed-point) \
-	$(call autoconf_bool,CONFIG_PACKAGE_$(PKG_NAME)-mod-spandsp,builtin-tiff) \
 	$(call autoconf_bool,CONFIG_PACKAGE_$(PKG_NAME)-mod-timerfd,timerfd-wrapper) \
 	$(if $(CONFIG_FS_WITH_ODBC),--with-odbc-lib="$(STAGING_DIR)/usr/lib") \
 	$(if $(CONFIG_FS_WITH_ODBC),--with-odbc="$(STAGING_DIR)/usr") \
@@ -607,7 +602,6 @@ CONFIGURE_ARGS+= \
 	$(if ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-curl)|$(CONFIG_PACKAGE_$(PKG_NAME)-mod-xml-cdr)|$(CONFIG_PACKAGE_$(PKG_NAME)-mod-xml-curl)),--with-libcurl="$(STAGING_DIR)/usr",--without-libcurl) \
 	--with$(if $(CONFIG_FS_WITH_MYSQL),,out)-mysql \
 	--with$(if $(CONFIG_FS_WITH_POSTGRESQL),,out)-pgsql \
-	--with$(if $(CONFIG_FS_WITH_SQLITE2),,out)-sqlite2 \
 	--with$(if $(CONFIG_FS_WITH_SQLITE3),,out)-sqlite3 \
 
 
@@ -894,182 +888,184 @@ define BuildPlugin
 
   define Package/$(PKG_NAME)-mod-$(1)/postinst
 #!/bin/sh
-sed -i -e 's|^\([ \t]*\)<!-- *\(.*\)"mod_$(subst -,_,$(1))"\(.*\) *-->\(.*\)$$$$|\1\2"mod_$(subst -,_,$(1))"\3\4|' $$$${IPKG_INSTROOT}/etc/$(PKG_NAME)/autoload_configs/modules.conf.xml
+sed -i -e 's#[^ \t]\(,*\)\(.*\)"mod_console"/>\(.*\)$$$$#\1<load module="mod_console"/>#g' $$$${IPKG_INSTROOT}/etc/$(PKG_NAME)/autoload_configs/modules.conf.xml
+exit 0
   endef
 
   define Package/$(PKG_NAME)-mod-$(1)/prerm
 #!/bin/sh
-sed -i -e 's|^\([ \t]*\)\(.*\)"mod_$(subst -,_,$(1))"\(.*\)$$$$|\1<!-- \2"mod_$(subst -,_,$(1))"\3 -->|' $$$${IPKG_INSTROOT}/etc/$(PKG_NAME)/autoload_configs/modules.conf.xml
+sed -i -e 's#[^ \t]\(,*\)\(.*\)"mod_console"/>\(.*\)$$$$#\1<!-- <load module="mod_console"/> -->#g' $$$${IPKG_INSTROOT}/etc/$(PKG_NAME)/autoload_configs/modules.conf.xml
+exit 0
   endef
 
   $$(eval $$(call BuildPackage,$(PKG_NAME)-mod-$(1)))
 endef
 
 
-$(eval $(call BuildPackage,$(PKG_NAME)))
-$(eval $(call BuildPackage,$(PKG_NAME)-collection-upstream-defaults))
-$(eval $(call BuildPackage,$(PKG_NAME)-collection-minimal))
-$(eval $(call BuildPackage,$(PKG_NAME)-sounds-en-08KHz))
-$(eval $(call BuildPackage,$(PKG_NAME)-sounds-en-16KHz))
-$(eval $(call BuildPackage,$(PKG_NAME)-sounds-en-32KHz))
-$(eval $(call BuildPackage,$(PKG_NAME)-sounds-en-48KHz))
-$(eval $(call BuildPackage,$(PKG_NAME)-sounds-moh-08KHz))
-$(eval $(call BuildPackage,$(PKG_NAME)-sounds-moh-16KHz))
-$(eval $(call BuildPackage,$(PKG_NAME)-sounds-moh-32KHz))
-$(eval $(call BuildPackage,$(PKG_NAME)-sounds-moh-48KHz))
-$(eval $(call BuildPackage,$(PKG_NAME)-tools))
-$(eval $(call BuildPackage,$(PKG_NAME)-example-config))
-$(eval $(call BuildPackage,$(PKG_NAME)-config-upstream-defaults))
-$(eval $(call BuildPackage,$(PKG_NAME)-config-minimal))
+#$(eval $(call BuildPackage,$(PKG_NAME)))
+#$(eval $(call BuildPackage,$(PKG_NAME)-collection-upstream-defaults))
+#$(eval $(call BuildPackage,$(PKG_NAME)-collection-minimal))
+#$(eval $(call BuildPackage,$(PKG_NAME)-sounds-en-08KHz))
+#$(eval $(call BuildPackage,$(PKG_NAME)-sounds-en-16KHz))
+#$(eval $(call BuildPackage,$(PKG_NAME)-sounds-en-32KHz))
+#$(eval $(call BuildPackage,$(PKG_NAME)-sounds-en-48KHz))
+#$(eval $(call BuildPackage,$(PKG_NAME)-sounds-moh-08KHz))
+#$(eval $(call BuildPackage,$(PKG_NAME)-sounds-moh-16KHz))
+#$(eval $(call BuildPackage,$(PKG_NAME)-sounds-moh-32KHz))
+#$(eval $(call BuildPackage,$(PKG_NAME)-sounds-moh-48KHz))
+#$(eval $(call BuildPackage,$(PKG_NAME)-tools))
+#$(eval $(call BuildPackage,$(PKG_NAME)-example-config))
+#$(eval $(call BuildPackage,$(PKG_NAME)-config-upstream-defaults))
+#$(eval $(call BuildPackage,$(PKG_NAME)-config-minimal))
 
 
 #
 # $(eval $(call BuildPlugin,Name,Title,Selection on module Conf File,Files,Inter Depends,Extra Depends))
 #
-$(eval $(call BuildPlugin,abstraction,An Abstraction To API Call,vanilla,,,,))
-$(eval $(call BuildPlugin,alsa,Alsa Endpoint,vanilla,,,,+FS_WITH_ALSA:alsa-lib @FS_WITH_ALSA))
-$(eval $(call BuildPlugin,amr,Adaptive Multi-Rate On Bandwidth Codec,vanilla,,,,))
-$(eval $(call BuildPlugin,amrwb,Wide Band AMR,vanilla,,,,))
-$(eval $(call BuildPlugin,av,FS Video Codec / File Format,vanilla,,,,@BROKEN))
-$(eval $(call BuildPlugin,avmd,Advanced Voice Mail Detection,vanilla,,,,))
-$(eval $(call BuildPlugin,basic,BASIC,vanilla,,,,))
-$(eval $(call BuildPlugin,bert,Naive Bit Error Rate Tester,vanilla,,,,))
-$(eval $(call BuildPlugin,blacklist,Blacklist,vanilla,,,,))
-$(eval $(call BuildPlugin,bv,BroadVoice 16/32-bit Audio Codec,vanilla,,,,@BROKEN)) # Requires unsupported libbroadvoice
-$(eval $(call BuildPlugin,callcenter,Call Center,vanilla,,,,))
-$(eval $(call BuildPlugin,cdr-csv,CSV-CDR Handler,mod,,,,)) # ~/conf
-$(eval $(call BuildPlugin,cdr-mongodb,MongoDB CDR logger,vanilla,,,,))
-$(eval $(call BuildPlugin,cdr-pg-csv,PostgreSQL CDR Handler,vanilla,,,,+coreutils +FS_WITH_POSTGRESQL:libpq @FS_WITH_POSTGRESQL))
-$(eval $(call BuildPlugin,cdr-sqlite,SQLite3 CDR Handler,vanilla,,,,@FS_WITH_SQLITE3))
-$(eval $(call BuildPlugin,cepstral,Cepstral Interface,vanilla,,,,@BROKEN)) # needs <swift.h>
-$(eval $(call BuildPlugin,cidlookup,Data Query For CID->NAME Services,mod,,,,+libcurl)) # ~/conf
-$(eval $(call BuildPlugin,cluechoo,Framework Demo,vanilla,,,,))
-$(eval $(call BuildPlugin,codec2,CoDec 2,,,,,@BROKEN)) # Requires unsupported libcodec2
-$(eval $(call BuildPlugin,commands,API Commands,vanilla,,,,))
-$(eval $(call BuildPlugin,conference,Conference Room,vanilla,,,,))
-$(eval $(call BuildPlugin,console,Console Logger,vanilla,,,,))
-$(eval $(call BuildPlugin,curl,HTTP Request,vanilla,,,,+libcurl))
-$(eval $(call BuildPlugin,cv,Detect Video motion,vanilla,,,,@BROKEN))
-$(eval $(call BuildPlugin,dahdi-codec,DAHDI Codecs,vanilla,,,,))
-$(eval $(call BuildPlugin,db,Database Backend,vanilla,,,,+libdb47))
-$(eval $(call BuildPlugin,dialplan-asterisk,Asterisk Dialplan Parser,vanilla,,,,))
-$(eval $(call BuildPlugin,dialplan-directory,Dialplan Directory,vanilla,,,,))
-$(eval $(call BuildPlugin,dialplan-xml,Dialplan-XML Interface,vanilla,,,,))
-$(eval $(call BuildPlugin,dingaling,Jabber Interface,vanilla,,,,+libopenssl))
-$(eval $(call BuildPlugin,directory,Search By Name Directory IVR,vanilla,,,,))
-$(eval $(call BuildPlugin,distributor,Simple Robin-Round Load,vanilla,,,,))
-$(eval $(call BuildPlugin,dptools,Dialplan Tools,vanilla,,,,))
-$(eval $(call BuildPlugin,easyroute,Simple DID Routing,vanilla,,,,))
-$(eval $(call BuildPlugin,enum,ENUM Routing,,,,,+libldns))
-$(eval $(call BuildPlugin,erlang-event,Erlang Event Handler,vanilla,,,,+erlang))
-$(eval $(call BuildPlugin,esf,Extra SIP Functionality,vanilla,,,,))
-$(eval $(call BuildPlugin,esl,Allow to generate remote ESL commands,vanilla,,,,@BROKEN))
-$(eval $(call BuildPlugin,event-multicast,Multicast Event Handler,vanilla,,,,))
-$(eval $(call BuildPlugin,event-socket,Socket Event Handler,vanilla,,,,))
-$(eval $(call BuildPlugin,event-zmq,Socket Event Handler By Zero MQ,vanilla,,,,+libuuid))
-$(eval $(call BuildPlugin,expr,Expression Evaluation,vanilla,,,,))
-$(eval $(call BuildPlugin,fifo,FIFO,vanilla,,,,))
-$(eval $(call BuildPlugin,file-string,Streaming Multiple Sound Files Sequentially,vanilla,,,,@OBSOLETE)) # merged into dptools
-$(eval $(call BuildPlugin,flite,Festival TTS,vanilla,,,,+flite @BROKEN)) # flite is from old package repo
-$(eval $(call BuildPlugin,format-cdr,XML CDR Module to files or curl,vanilla,,,,))
-$(eval $(call BuildPlugin,fsk,Bell-202 1200-Baud FSK Decoder,vanilla,,,,))
-$(eval $(call BuildPlugin,fsv,Video Player / Recorder,vanilla,,,,+libyuv @BROKEN)) # Requires unsupported libyuv.
-$(eval $(call BuildPlugin,g723-1,G.723.1 Codec,vanilla,,,,))
-$(eval $(call BuildPlugin,g729,G.729 Codec,vanilla,,,,))
-$(eval $(call BuildPlugin,graylog2,Graylog2 GELF logger,vanilla,,,,))
-$(eval $(call BuildPlugin,gsmopen,GSM Modem compatible Endpoint,mod,,,alsa,+FS_WITH_ALSA:alsa-lib +FS_WITH_LZMA:liblzma @FS_WITH_ALSA @BROKEN)) # needs gsmlib
-$(eval $(call BuildPlugin,h26x,H26X Linear Codec,vanilla,,,,))
-$(eval $(call BuildPlugin,h323,H323 Endpoint,mod,,,,@BROKEN)) # Req. H323Plus v1.24.x or newer
-$(eval $(call BuildPlugin,hash,API For Manipulating A Hash Table,vanilla,,,,))
-$(eval $(call BuildPlugin,hiredis,Redis DB access,vanilla,,,,+hiredis @BROKEN))
-#$(eval $(call BuildPlugin,html5,HTML5 Endpoint Module,vanilla,,,,)) # defunct?
-$(eval $(call BuildPlugin,httapi,HT Telephony API and HTTP Caching,mod,,,,)) # ~/conf
-$(eval $(call BuildPlugin,http-cache,HTTP GET With Caching,mod,,,,+libcurl)) # ~/conf
-$(eval $(call BuildPlugin,ilbc,ILBC Codec,vanilla,,,,+libilbc @BROKEN)) # Requires unsupported libilbc.
-$(eval $(call BuildPlugin,isac,iSAC Codec,vanilla,,,,))
-$(eval $(call BuildPlugin,java,Java Language Interface,vanilla,,,,@BROKEN)) # needs java
-$(eval $(call BuildPlugin,json-cdr,JSon-CDR Interface,mod,,,,+libcurl))
-$(eval $(call BuildPlugin,kazoo,Socket Controlled Event Handler,vanilla,,,,+erlang))
-$(eval $(call BuildPlugin,ldap,LDAP interface,vanilla,,,,+libopenldap))
-$(eval $(call BuildPlugin,lcr,Least Cost Routing,vanilla,,,,))
-$(eval $(call BuildPlugin,local-stream,Multi-Channel On Same Stream,vanilla,,,,))
-$(eval $(call BuildPlugin,logfile,File Logger,vanilla,,,,))
-$(eval $(call BuildPlugin,loopback,Loopback to Dialplan Endpoint,vanilla,,,,))
-$(eval $(call BuildPlugin,lua,LUA Language Interface,vanilla,,,,+liblua))
-$(eval $(call BuildPlugin,managed,Media Switching Software Library,vanilla,,,,+glib2 @BROKEN)) # needs Mono
-$(eval $(call BuildPlugin,memcache,MemCached Interface,vanilla,,,,+libmemcached @BROKEN)) # Req host libmemcached
-$(eval $(call BuildPlugin,mongo,A Document-Oriented Database,vanilla,,,,@BROKEN))
-$(eval $(call BuildPlugin,mp4,MP4 File Format Support For Video,vanilla,,,,@BROKEN)) # needs host libmp4v2
-$(eval $(call BuildPlugin,mp4v,MP4 CoDec Support For Video,vanilla,,,,))
-$(eval $(call BuildPlugin,native-file,WAV Format Sound Player,vanilla,,,,))
-$(eval $(call BuildPlugin,nibblebill,Credit / Debit Billing,vanilla,,,,))
-$(eval $(call BuildPlugin,opus,Opus CoDec,vanilla,,,,+libopus))
-$(eval $(call BuildPlugin,oreka,Media Recording with Oreka,vanilla,,,,))
-$(eval $(call BuildPlugin,png,play a png as video with audio,vanilla,,,,+libpng))
-$(eval $(call BuildPlugin,perl,Perl Language Interface,vanilla,,lib/perl5/$(PERL_VERSION)/$(PKG_NAME).la lib/perl5/$(PERL_VERSION)/$(PKG_NAME).pm lib/perl5/$(PERL_VERSION)/$(PKG_NAME).so,,+perl +libdb47 +libgdbm @BROKEN))
-$(eval $(call BuildPlugin,portaudio,Portaudio To Sound Card Interface,vanilla,,,alsa,+FS_WITH_ALSA:alsa-lib @FS_WITH_ALSA @BROKEN)) # needs portaudio
-$(eval $(call BuildPlugin,portaudio-stream,Portaudio Streaming Interface,vanilla,,,alsa,+FS_WITH_ALSA:alsa-lib @FS_WITH_ALSA @BROKEN)) # needs portaudio
-$(eval $(call BuildPlugin,posix-timer,POSIX Compliant Soft Timer,vanilla,,,,))
-$(eval $(call BuildPlugin,prefix,longest-prefix match in store,mod,,,,))
-$(eval $(call BuildPlugin,python,Python Language Interface,vanilla,,lib/python$(PYTHON3_VERSION)/site-packages/freeswitch.py,,+FS_WITH_PYTHON:python3 @FS_WITH_PYTHON))
-$(eval $(call BuildPlugin,radius-cdr,Radius-CDR interface,vanilla,,,,@BROKEN)) # fails in freeradius-client
-$(eval $(call BuildPlugin,rayo,Rayo server & node implementation,vanilla,,,,))
-$(eval $(call BuildPlugin,redis,Redis limit backend,vanilla,,,,))
-$(eval $(call BuildPlugin,rss,RRS Feeds via TTS,vanilla,,,,))
-$(eval $(call BuildPlugin,rtc,RTC endpoint,vanilla,,,,))
-$(eval $(call BuildPlugin,rtmp,RTMP Protocol Handler,vanilla,,,,))
-$(eval $(call BuildPlugin,sangoma-codec,Sangoma Codec,vanilla,,,,@BROKEN)) # Req. Sangoma CoDec source
-$(eval $(call BuildPlugin,say-de,German Say,vanilla,,,,))
-$(eval $(call BuildPlugin,say-en,English Say,vanilla,,,,))
-$(eval $(call BuildPlugin,say-es,Spanish Say,vanilla,,,,))
-$(eval $(call BuildPlugin,say-fa,Persian Say,vanilla,,,,))
-$(eval $(call BuildPlugin,say-fr,French Say,vanilla,,,,))
-$(eval $(call BuildPlugin,say-hu,Hungarian Say,vanilla,,,,))
-$(eval $(call BuildPlugin,say-it,Italian Say,vanilla,,,,))
-$(eval $(call BuildPlugin,say-nl,Dutch Say,vanilla,,,,))
-$(eval $(call BuildPlugin,say-pt,Portugeese Say,vanilla,,,,))
-$(eval $(call BuildPlugin,say-ru,Russian Say,vanilla,,,,))
-$(eval $(call BuildPlugin,say-th,Thai Say,vanilla,,,,))
-$(eval $(call BuildPlugin,say-zh,Chineese Say,vanilla,,,,))
-$(eval $(call BuildPlugin,shell-stream,Streaming Audio Through CLI,vanilla,,,,))
-$(eval $(call BuildPlugin,silk,Skype(TM) SILK Codec Module,vanilla,,,,+libsilk @BROKEN)) # Requires unsupported libsilk
-$(eval $(call BuildPlugin,siren,G.722.1 Codec,vanilla,,,,+libg7221 @BROKEN)) # Requires unsupported libg7221
-$(eval $(call BuildPlugin,skel,Template For New Module,vanilla,,,,@BROKEN))
-$(eval $(call BuildPlugin,skinny,Skinny Call Control Protocol (SCCP),vanilla,,,,))
-$(eval $(call BuildPlugin,skypopen,Skype Compatible Endpoint,mod,,,,@FEATURE_drawing-backend_libX11))
-$(eval $(call BuildPlugin,sms,SMS,vanilla,,,,))
-$(eval $(call BuildPlugin,smpp,smpp client and server implementation,vanilla,,,,@BROKEN))
-$(eval $(call BuildPlugin,snapshot,Record Audio Snapshot to File,vanilla,,,,))
-$(eval $(call BuildPlugin,sndfile,Multi-Format Sound File,vanilla,,,,+libsndfile))
-$(eval $(call BuildPlugin,snmp,SNMP AgentX Subagent,vanilla,,,,+libnetsnmp))
-$(eval $(call BuildPlugin,snom,SNOM specific features,vanilla,,,,))
-$(eval $(call BuildPlugin,sofia,SOFIA SIP,mod,,,,)) # ~/conf
-$(eval $(call BuildPlugin,sonar,Sonar Ping Timer,vanilla,,,,))
-$(eval $(call BuildPlugin,spandsp,Span DSP,mod,,,,+libjpeg +FS_WITH_LZMA:liblzma @FS_WITH_LZMA)) # ~/conf
-$(eval $(call BuildPlugin,spidermonkey,JavaScript,vanilla,,,,@BROKEN)) # fails in js
-$(eval $(call BuildPlugin,spidermonkey-core_db,JavaScript DB,vanilla,,,,@BROKEN))
-$(eval $(call BuildPlugin,spidermonkey-curl,JavaScript Curl,vanilla,,,,@BROKEN))
-$(eval $(call BuildPlugin,spidermonkey-odbc,JavaScript ODBC,vanilla,,,,@BROKEN))
-$(eval $(call BuildPlugin,spidermonkey-socket,JavaScript Socket,vanilla,,,,@BROKEN))
-$(eval $(call BuildPlugin,spidermonkey-teletone,JavaScript Teletone,vanilla,,,,@BROKEN))
-$(eval $(call BuildPlugin,spy,User Spy,vanilla,,,,))
-$(eval $(call BuildPlugin,ssml,SSML audio rendering format,mod,,,rayo,))
-$(eval $(call BuildPlugin,stress,Voice Stress Detection,vanilla,,,,))
-$(eval $(call BuildPlugin,syslog,SysLog logger,vanilla,,,,))
-$(eval $(call BuildPlugin,timerfd,Linux Kernel timerfd API,vanilla,,,,))
-$(eval $(call BuildPlugin,tone-stream,Tone Generation Stream,vanilla,,,,))
-$(eval $(call BuildPlugin,translate,Translate,vanilla,,,,))
-$(eval $(call BuildPlugin,tts-commandline,ASR TTS Command Interface,vanilla,,,,))
-$(eval $(call BuildPlugin,unimrcp,UniMRCP (MRCP Client),vanilla,,,,@BROKEN))
-$(eval $(call BuildPlugin,valet-parking,Valet Parking Application,vanilla,,,,))
-$(eval $(call BuildPlugin,verto,HTML5 Verto interface,vanilla,,lib/perl5/$(PERL_VERSION)/MCAST.so lib/perl5/$(PERL_VERSION)/MCAST.la lib/perl5/$(PERL_VERSION)/MCAST.pm,perl rtc,+perl @BROKEN))
-$(eval $(call BuildPlugin,vmd,VoiceMail Beep Detection,vanilla,,,,))
-$(eval $(call BuildPlugin,voicemail,VoiceMail,vanilla,,,,))
-$(eval $(call BuildPlugin,voicemail-ivr,VoiceMail IVR,vanilla,,,,))
-$(eval $(call BuildPlugin,xml-cdr,XML-CDR Handler,vanilla,,,,+libcurl))
-$(eval $(call BuildPlugin,xml-curl,XML-Curl Gateway,vanilla,,,,+libcurl))
-$(eval $(call BuildPlugin,xml-ldap,LDAP-XML Gateway,vanilla,,,,+PACKAGE_$(PKG_NAME)-mod-ldap:libopenldap))
-$(eval $(call BuildPlugin,xml-rpc,XML-RPC Interface,vanilla,,,,))
-$(eval $(call BuildPlugin,xml-radius,Radius authentication and authorization,vanilla,,,,+freeradius-client @BROKEN)) # freeradius-client isn't yet supported by OpenWRT.
-$(eval $(call BuildPlugin,xml-scgi,SCGI XML Gateway,vanilla,,,,))
-$(eval $(call BuildPlugin,yaml,YAML language,vanilla,,,,+libyaml))
+#$(eval $(call BuildPlugin,abstraction,An Abstraction To API Call,vanilla,,,,))
+#$(eval $(call BuildPlugin,alsa,Alsa Endpoint,vanilla,,,,+FS_WITH_ALSA:alsa-lib @FS_WITH_ALSA))
+#$(eval $(call BuildPlugin,amr,Adaptive Multi-Rate On Bandwidth Codec,vanilla,,,,))
+#$(eval $(call BuildPlugin,amrwb,Wide Band AMR,vanilla,,,,))
+#$(eval $(call BuildPlugin,av,FS Video Codec / File Format,vanilla,,,,@BROKEN))
+#$(eval $(call BuildPlugin,avmd,Advanced Voice Mail Detection,vanilla,,,,))
+#$(eval $(call BuildPlugin,basic,BASIC,vanilla,,,,))
+#$(eval $(call BuildPlugin,bert,Naive Bit Error Rate Tester,vanilla,,,,))
+#$(eval $(call BuildPlugin,blacklist,Blacklist,vanilla,,,,))
+#$(eval $(call BuildPlugin,bv,BroadVoice 16/32-bit Audio Codec,vanilla,,,,@BROKEN)) # Requires unsupported libbroadvoice
+#$(eval $(call BuildPlugin,callcenter,Call Center,vanilla,,,,))
+#$(eval $(call BuildPlugin,cdr-csv,CSV-CDR Handler,mod,,,,)) # ~/conf
+#$(eval $(call BuildPlugin,cdr-mongodb,MongoDB CDR logger,vanilla,,,,))
+#$(eval $(call BuildPlugin,cdr-pg-csv,PostgreSQL CDR Handler,vanilla,,,,+coreutils +FS_WITH_POSTGRESQL:libpq @FS_WITH_POSTGRESQL))
+#$(eval $(call BuildPlugin,cdr-sqlite,SQLite3 CDR Handler,vanilla,,,,@FS_WITH_SQLITE3))
+#$(eval $(call BuildPlugin,cepstral,Cepstral Interface,vanilla,,,,@BROKEN)) # needs <swift.h>
+#$(eval $(call BuildPlugin,cidlookup,Data Query For CID->NAME Services,mod,,,,+libcurl)) # ~/conf
+#$(eval $(call BuildPlugin,cluechoo,Framework Demo,vanilla,,,,))
+#$(eval $(call BuildPlugin,codec2,CoDec 2,,,,,@BROKEN)) # Requires unsupported libcodec2
+#$(eval $(call BuildPlugin,commands,API Commands,vanilla,,,,))
+#$(eval $(call BuildPlugin,conference,Conference Room,vanilla,,,,))
+#$(eval $(call BuildPlugin,console,Console Logger,vanilla,,,,))
+#$(eval $(call BuildPlugin,curl,HTTP Request,vanilla,,,,+libcurl))
+#$(eval $(call BuildPlugin,cv,Detect Video motion,vanilla,,,,@BROKEN))
+#$(eval $(call BuildPlugin,dahdi-codec,DAHDI Codecs,vanilla,,,,))
+#$(eval $(call BuildPlugin,db,Database Backend,vanilla,,,,+libdb47))
+#$(eval $(call BuildPlugin,dialplan-asterisk,Asterisk Dialplan Parser,vanilla,,,,))
+#$(eval $(call BuildPlugin,dialplan-directory,Dialplan Directory,vanilla,,,,))
+#$(eval $(call BuildPlugin,dialplan-xml,Dialplan-XML Interface,vanilla,,,,))
+#$(eval $(call BuildPlugin,dingaling,Jabber Interface,vanilla,,,,+libopenssl))
+#$(eval $(call BuildPlugin,directory,Search By Name Directory IVR,vanilla,,,,))
+#$(eval $(call BuildPlugin,distributor,Simple Robin-Round Load,vanilla,,,,))
+#$(eval $(call BuildPlugin,dptools,Dialplan Tools,vanilla,,,,))
+#$(eval $(call BuildPlugin,easyroute,Simple DID Routing,vanilla,,,,))
+#$(eval $(call BuildPlugin,enum,ENUM Routing,,,,,+libldns))
+#$(eval $(call BuildPlugin,erlang-event,Erlang Event Handler,vanilla,,,,+erlang))
+#$(eval $(call BuildPlugin,esf,Extra SIP Functionality,vanilla,,,,))
+#$(eval $(call BuildPlugin,esl,Allow to generate remote ESL commands,vanilla,,,,@BROKEN))
+#$(eval $(call BuildPlugin,event-multicast,Multicast Event Handler,vanilla,,,,))
+#$(eval $(call BuildPlugin,event-socket,Socket Event Handler,vanilla,,,,))
+#$(eval $(call BuildPlugin,event-zmq,Socket Event Handler By Zero MQ,vanilla,,,,+libuuid))
+#$(eval $(call BuildPlugin,expr,Expression Evaluation,vanilla,,,,))
+#$(eval $(call BuildPlugin,fifo,FIFO,vanilla,,,,))
+#$(eval $(call BuildPlugin,file-string,Streaming Multiple Sound Files Sequentially,vanilla,,,,@OBSOLETE)) # merged into dptools
+##$(eval $(call BuildPlugin,flite,Festival TTS,vanilla,,,,+flite @BROKEN)) # flite is from old package repo
+#$(eval $(call BuildPlugin,format-cdr,XML CDR Module to files or curl,vanilla,,,,))
+#$(eval $(call BuildPlugin,fsk,Bell-202 1200-Baud FSK Decoder,vanilla,,,,))
+##$(eval $(call BuildPlugin,fsv,Video Player / Recorder,vanilla,,,,+libyuv @BROKEN)) # Requires unsupported libyuv.
+#$(eval $(call BuildPlugin,g723-1,G.723.1 Codec,vanilla,,,,))
+#$(eval $(call BuildPlugin,g729,G.729 Codec,vanilla,,,,))
+#$(eval $(call BuildPlugin,graylog2,Graylog2 GELF logger,vanilla,,,,))
+#$(eval $(call BuildPlugin,gsmopen,GSM Modem compatible Endpoint,mod,,,alsa,+FS_WITH_ALSA:alsa-lib +FS_WITH_LZMA:liblzma @FS_WITH_ALSA @BROKEN)) # needs gsmlib
+#$(eval $(call BuildPlugin,h26x,H26X Linear Codec,vanilla,,,,))
+##$(eval $(call BuildPlugin,h323,H323 Endpoint,mod,,,,@BROKEN)) # Req. H323Plus v1.24.x or newer
+#$(eval $(call BuildPlugin,hash,API For Manipulating A Hash Table,vanilla,,,,))
+#$(eval $(call BuildPlugin,hiredis,Redis DB access,vanilla,,,,+libhiredis @BROKEN))
+##$(eval $(call BuildPlugin,html5,HTML5 Endpoint Module,vanilla,,,,)) # defunct?
+#$(eval $(call BuildPlugin,httapi,HT Telephony API and HTTP Caching,mod,,,,)) # ~/conf
+#$(eval $(call BuildPlugin,http-cache,HTTP GET With Caching,mod,,,,+libcurl)) # ~/conf
+##$(eval $(call BuildPlugin,ilbc,ILBC Codec,vanilla,,,,+libilbc @BROKEN)) # Requires unsupported libilbc.
+#$(eval $(call BuildPlugin,isac,iSAC Codec,vanilla,,,,))
+##$(eval $(call BuildPlugin,java,Java Language Interface,vanilla,,,,@BROKEN)) # needs java
+#$(eval $(call BuildPlugin,json-cdr,JSon-CDR Interface,mod,,,,+libcurl))
+#$(eval $(call BuildPlugin,kazoo,Socket Controlled Event Handler,vanilla,,,,+erlang))
+#$(eval $(call BuildPlugin,ldap,LDAP interface,vanilla,,,,+libopenldap))
+#$(eval $(call BuildPlugin,lcr,Least Cost Routing,vanilla,,,,))
+#$(eval $(call BuildPlugin,local-stream,Multi-Channel On Same Stream,vanilla,,,,))
+#$(eval $(call BuildPlugin,logfile,File Logger,vanilla,,,,))
+#$(eval $(call BuildPlugin,loopback,Loopback to Dialplan Endpoint,vanilla,,,,))
+#$(eval $(call BuildPlugin,lua,LUA Language Interface,vanilla,,,,+liblua))
+##$(eval $(call BuildPlugin,managed,Media Switching Software Library,vanilla,,,,+glib2 @BROKEN)) # needs Mono
+##$(eval $(call BuildPlugin,memcache,MemCached Interface,vanilla,,,,+libmemcached @BROKEN)) # Req host libmemcached
+##$(eval $(call BuildPlugin,mongo,A Document-Oriented Database,vanilla,,,,@BROKEN))
+##$(eval $(call BuildPlugin,mp4,MP4 File Format Support For Video,vanilla,,,,@BROKEN)) # needs host libmp4v2
+#$(eval $(call BuildPlugin,mp4v,MP4 CoDec Support For Video,vanilla,,,,))
+#$(eval $(call BuildPlugin,native-file,WAV Format Sound Player,vanilla,,,,))
+#$(eval $(call BuildPlugin,nibblebill,Credit / Debit Billing,vanilla,,,,))
+#$(eval $(call BuildPlugin,opus,Opus CoDec,vanilla,,,,+libopus))
+#$(eval $(call BuildPlugin,oreka,Media Recording with Oreka,vanilla,,,,))
+#$(eval $(call BuildPlugin,png,play a png as video with audio,vanilla,,,,+libpng))
+#$(eval $(call BuildPlugin,perl,Perl Language Interface,vanilla,,lib/perl5/$(PERL_VERSION)/CORE/$(PKG_NAME).la lib/perl5/$(PERL_VERSION)/CORE/$(PKG_NAME).pm lib/perl5/$(PERL_VERSION)/CORE/$(PKG_NAME).so,,+perl +libdb47 +libgdbm))
+#$(eval $(call BuildPlugin,portaudio,Portaudio To Sound Card Interface,vanilla,,,alsa,+FS_WITH_ALSA:alsa-lib @FS_WITH_ALSA @BROKEN)) # needs portaudio
+#$(eval $(call BuildPlugin,portaudio-stream,Portaudio Streaming Interface,vanilla,,,alsa,+FS_WITH_ALSA:alsa-lib @FS_WITH_ALSA @BROKEN)) # needs portaudio
+#$(eval $(call BuildPlugin,posix-timer,POSIX Compliant Soft Timer,vanilla,,,,))
+#$(eval $(call BuildPlugin,prefix,longest-prefix match in store,mod,,,,))
+#$(eval $(call BuildPlugin,python,Python Language Interface,vanilla,,lib/python$(PYTHON3_VERSION)/site-packages/freeswitch.py,,+FS_WITH_PYTHON:python3 @FS_WITH_PYTHON))
+##$(eval $(call BuildPlugin,radius-cdr,Radius-CDR interface,vanilla,,,,+freeradius3 @BROKEN)) # fails in freeradius-client
+#$(eval $(call BuildPlugin,rayo,Rayo server & node implementation,vanilla,,,,))
+#$(eval $(call BuildPlugin,redis,Redis limit backend,vanilla,,,,))
+#$(eval $(call BuildPlugin,rss,RRS Feeds via TTS,vanilla,,,,))
+#$(eval $(call BuildPlugin,rtc,RTC endpoint,vanilla,,,,))
+#$(eval $(call BuildPlugin,rtmp,RTMP Protocol Handler,vanilla,,,,))
+##$(eval $(call BuildPlugin,sangoma-codec,Sangoma Codec,vanilla,,,,@BROKEN)) # Req. Sangoma CoDec source
+#$(eval $(call BuildPlugin,say-de,German Say,vanilla,,,,))
+#$(eval $(call BuildPlugin,say-en,English Say,vanilla,,,,))
+#$(eval $(call BuildPlugin,say-es,Spanish Say,vanilla,,,,))
+#$(eval $(call BuildPlugin,say-fa,Persian Say,vanilla,,,,))
+#$(eval $(call BuildPlugin,say-fr,French Say,vanilla,,,,))
+#$(eval $(call BuildPlugin,say-hu,Hungarian Say,vanilla,,,,))
+#$(eval $(call BuildPlugin,say-it,Italian Say,vanilla,,,,))
+#$(eval $(call BuildPlugin,say-nl,Dutch Say,vanilla,,,,))
+#$(eval $(call BuildPlugin,say-pt,Portugeese Say,vanilla,,,,))
+#$(eval $(call BuildPlugin,say-ru,Russian Say,vanilla,,,,))
+#$(eval $(call BuildPlugin,say-th,Thai Say,vanilla,,,,))
+#$(eval $(call BuildPlugin,say-zh,Chineese Say,vanilla,,,,))
+#$(eval $(call BuildPlugin,shell-stream,Streaming Audio Through CLI,vanilla,,,,))
+##$(eval $(call BuildPlugin,silk,Skype(TM) SILK Codec Module,vanilla,,,,+libsilk @BROKEN)) # Requires unsupported libsilk
+##$(eval $(call BuildPlugin,siren,G.722.1 Codec,vanilla,,,,+libg7221 @BROKEN)) # Requires unsupported libg7221
+##$(eval $(call BuildPlugin,skel,Template For New Module,vanilla,,,,@BROKEN))
+#$(eval $(call BuildPlugin,skinny,Skinny Call Control Protocol (SCCP),vanilla,,,,))
+#$(eval $(call BuildPlugin,skypopen,Skype Compatible Endpoint,mod,,,,@FEATURE_drawing-backend_libX11))
+#$(eval $(call BuildPlugin,sms,SMS,vanilla,,,,))
+##$(eval $(call BuildPlugin,smpp,smpp client and server implementation,vanilla,,,,@BROKEN))
+#$(eval $(call BuildPlugin,snapshot,Record Audio Snapshot to File,vanilla,,,,))
+#$(eval $(call BuildPlugin,sndfile,Multi-Format Sound File,vanilla,,,,+libsndfile))
+#$(eval $(call BuildPlugin,snmp,SNMP AgentX Subagent,vanilla,,,,+libnetsnmp))
+#$(eval $(call BuildPlugin,snom,SNOM specific features,vanilla,,,,))
+#$(eval $(call BuildPlugin,sofia,SOFIA SIP,mod,,,,)) # ~/conf
+#$(eval $(call BuildPlugin,sonar,Sonar Ping Timer,vanilla,,,,))
+#$(eval $(call BuildPlugin,spandsp,Span DSP,mod,,,,+libjpeg +FS_WITH_LZMA:liblzma @FS_WITH_LZMA +libtiff)) # ~/conf
+#$(eval $(call BuildPlugin,spidermonkey,JavaScript,vanilla,,,,@BROKEN)) # fails in js
+##$(eval $(call BuildPlugin,spidermonkey-core_db,JavaScript DB,vanilla,,,,@BROKEN))
+##$(eval $(call BuildPlugin,spidermonkey-curl,JavaScript Curl,vanilla,,,,@BROKEN))
+##$(eval $(call BuildPlugin,spidermonkey-odbc,JavaScript ODBC,vanilla,,,,@BROKEN))
+##$(eval $(call BuildPlugin,spidermonkey-socket,JavaScript Socket,vanilla,,,,@BROKEN))
+##$(eval $(call BuildPlugin,spidermonkey-teletone,JavaScript Teletone,vanilla,,,,@BROKEN))
+#$(eval $(call BuildPlugin,spy,User Spy,vanilla,,,,))
+#$(eval $(call BuildPlugin,ssml,SSML audio rendering format,mod,,,rayo,))
+#$(eval $(call BuildPlugin,stress,Voice Stress Detection,vanilla,,,,))
+#$(eval $(call BuildPlugin,syslog,SysLog logger,vanilla,,,,))
+#$(eval $(call BuildPlugin,timerfd,Linux Kernel timerfd API,vanilla,,,,))
+#$(eval $(call BuildPlugin,tone-stream,Tone Generation Stream,vanilla,,,,))
+#$(eval $(call BuildPlugin,translate,Translate,vanilla,,,,))
+#$(eval $(call BuildPlugin,tts-commandline,ASR TTS Command Interface,vanilla,,,,))
+##$(eval $(call BuildPlugin,unimrcp,UniMRCP (MRCP Client),vanilla,,,,@BROKEN))
+#$(eval $(call BuildPlugin,valet-parking,Valet Parking Application,vanilla,,,,))
+#$(eval $(call BuildPlugin,verto,HTML5 Verto interface,vanilla,,,perl rtc,+perl))
+#$(eval $(call BuildPlugin,vmd,VoiceMail Beep Detection,vanilla,,,,))
+#$(eval $(call BuildPlugin,voicemail,VoiceMail,vanilla,,,,))
+#$(eval $(call BuildPlugin,voicemail-ivr,VoiceMail IVR,vanilla,,,,))
+#$(eval $(call BuildPlugin,xml-cdr,XML-CDR Handler,vanilla,,,,+libcurl))
+#$(eval $(call BuildPlugin,xml-curl,XML-Curl Gateway,vanilla,,,,+libcurl))
+#$(eval $(call BuildPlugin,xml-ldap,LDAP-XML Gateway,vanilla,,,,+PACKAGE_$(PKG_NAME)-mod-ldap:libopenldap))
+#$(eval $(call BuildPlugin,xml-rpc,XML-RPC Interface,vanilla,,,,))
+#$(eval $(call BuildPlugin,xml-radius,Radius authentication and authorization,vanilla,,,,+freeradius3))
+#$(eval $(call BuildPlugin,xml-scgi,SCGI XML Gateway,vanilla,,,,))
+#$(eval $(call BuildPlugin,yaml,YAML language,vanilla,,,,+libyaml))
