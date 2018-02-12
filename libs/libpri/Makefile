@@ -25,7 +25,7 @@ define Package/libpri
   CATEGORY:=Libraries
   TITLE:=libpri Primary Rate ISDN implementation
   URL:=http://www.asterisk.org/
-  DEPENDS:=+dahdi-tools-libtonezone
+#  DEPENDS:=+dahdi-tools-libtonezone
 endef
 
 define Package/libpri/description
