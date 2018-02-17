@@ -1,8 +1,4 @@
-commit 8c94c5d442b36dcfdc2f9fa578759008acad0e9c
-Merge: 94b7a83 23b3363
+commit 5eff04c674b0bd13bfcbf2f1e3cd4e5372a5efb3
+Merge: 5f90ebd 9113396
 Author: Jiri Slachta <jiri.slachta@gmail.com>
-Date:   Thu Dec 14 08:33:32 2017 +0100
-
-    Merge pull request #226 from micmac1/baresip
-    
-    baresip/re: build fix and a workaround
+Date:   Mon Feb 12 07:05:00 2018 +0100
