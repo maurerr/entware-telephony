@@ -8,11 +8,9 @@
 
 include $(TOPDIR)/rules.mk
 
-RELEASEVER:=6.0.0
-
 PKG_NAME:=yate
-PKG_VERSION:=$(RELEASEVER)-1
-PKG_RELEASE:=3
+PKG_VERSION:=6.0.0-1
+PKG_RELEASE:=8
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://yate.null.ro/tarballs/yate6/
@@ -26,6 +24,20 @@ PKG_MAINTAINER:=Jiri Slachta <jiri@slachta.eu>
 PKG_FIXUP:=autoreconf
 
 PKG_INSTALL:=1
+
+# Yate currently does not compile with FORTIFY_SOURCE enabled
+PKG_FORTIFY_SOURCE:=0
+
+PKG_CONFIG_DEPENDS:= \
+	CONFIG_PACKAGE_$(PKG_NAME)-mod-zapcard \
+	CONFIG_PACKAGE_$(PKG_NAME)-mod-ilbcwebrtc \
+	CONFIG_PACKAGE_$(PKG_NAME)-mod-isaccodec \
+	CONFIG_PACKAGE_$(PKG_NAME)-mod-pgsqldb \
+	CONFIG_PACKAGE_$(PKG_NAME)-mod-mysqld \
+	CONFIG_PACKAGE_$(PKG_NAME)-mod-faxchan \
+	CONFIG_PACKAGE_$(PKG_NAME)-mod-openssl \
+	CONFIG_PACKAGE_$(PKG_NAME)-mod-zlibcompress \
+	CONFIG_SOFT_FLOAT
 
 include $(INCLUDE_DIR)/uclibc++.mk
 include $(INCLUDE_DIR)/package.mk
@@ -83,17 +95,18 @@ define Package/$(PKG_NAME)-collection-basic
    TITLE := Basic Yate Server
 endef
 
+# Otherwise yate ignores CPPFLAGS
+TARGET_CFLAGS += $(TARGET_CPPFLAGS)
+
 CONFIGURE_ARGS+= \
 	$(if $(CONFIG_x86_64),--enable-sse2) \
 	--disable-sctp \
-	--disable-dahdi \
-	--disable-zaptel \
+	$(if $(CONFIG_PACKAGE_$(PKG_NAME)-mod-zapcard),,--disable-dahdi --disable-zaptel) \
 	--disable-wpcard \
 	--disable-tdmcard \
 	--disable-wanpipe \
 	--enable-ilbc \
 	$(if $(CONFIG_PACKAGE_$(PKG_NAME)-mod-ilbcwebrtc),--enable-ilbc-webrtc,--disable-ilbc-webrtc) \
-	--enable-rtti \
 	$(if $(CONFIG_PACKAGE_$(PKG_NAME)-mod-pgsqldb),--with-libpq="$(STAGING_DIR)/usr",--without-libpq) \
 	$(if $(CONFIG_PACKAGE_$(PKG_NAME)-mod-mysqldb),--with-mysql="$(STAGING_DIR)/usr",--without-mysql) \
 	--without-wphwec \
@@ -122,14 +135,13 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/lib
 	
 	for yatelib in "" asn sig mgcp jabber script; do \
-		$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/lib/libyate$$$${yatelib}.so.$(RELEASEVER) $(1)/usr/lib ;\
-		$(LN) ./libyate$$$${yatelib}.so.$(RELEASEVER) $(1)/usr/lib/libyate$$$${yatelib}.so ;\
+		$(CP) $(PKG_INSTALL_DIR)/usr/lib/libyate$$$${yatelib}.so* $(1)/usr/lib ;\
 	done
 	
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/yate $(1)/usr/bin/
 	$(INSTALL_DIR) $(1)/etc/$(PKG_NAME)
-	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/etc/yate/yate.conf $(1)/etc/$(PKG_NAME)/yate.conf
+	$(INSTALL_CONF) $(PKG_INSTALL_DIR)/etc/yate/yate.conf $(1)/etc/$(PKG_NAME)/yate.conf
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/yate.init $(1)/etc/init.d/yate
 endef
@@ -156,26 +168,26 @@ define Build/InstallDev
 endef
 
 define BuildPlugin
-  define Package/$(PKG_NAME)-mod-$(1)
+  define Package/$(PKG_NAME)-mod-$(subst _,-,$(1))
     $(call Package/yate/Default)
-    DEPENDS:= $(PKG_NAME) $(patsubst +%,+PACKAGE_$(PKG_NAME)-mod-$(1):%,$(4))
+    DEPENDS:= $(PKG_NAME) $(patsubst +%,+PACKAGE_$(PKG_NAME)-mod-$(subst _,-,$(1)):%,$(4))
     TITLE:=$(3)
   endef
 
-  define Package/$(PKG_NAME)-mod-$(1)/conffiles
+  define Package/$(PKG_NAME)-mod-$(subst _,-,$(1))/conffiles
 $(if $(6),/etc/yate/$(1).conf)
   endef
   
-  define Package/$(PKG_NAME)-mod-$(1)/description
+  define Package/$(PKG_NAME)-mod-$(subst _,-,$(1))/description
     $(3) module for $(PKG_NAME)
   endef
   
-  define Package/$(PKG_NAME)-mod-$(1)/install
+  define Package/$(PKG_NAME)-mod-$(subst _,-,$(1))/install
 	$$(INSTALL_DIR) $$(1)/usr/lib/yate/$(2)
 	$$(INSTALL_BIN) $$(PKG_INSTALL_DIR)/usr/lib/yate/$(2)/$(1).yate $$(1)/usr/lib/yate/$(2)/$(1).yate
 	if [ -f $$(PKG_INSTALL_DIR)/etc/yate/$(1).conf ]; then \
 		$$(INSTALL_DIR) $$(1)/etc/yate ;\
-		$$(INSTALL_DATA) $$(PKG_INSTALL_DIR)/etc/yate/$(1).conf $$(1)/etc/yate/ ;\
+		$$(INSTALL_CONF) $$(PKG_INSTALL_DIR)/etc/yate/$(1).conf $$(1)/etc/yate/ ;\
 	fi
 	$(if $(5),$(foreach extra_file,$(5),\
 		$(INSTALL_DIR) $$(1)$(dir $(extra_file)) ; \
@@ -183,7 +195,7 @@ $(if $(6),/etc/yate/$(1).conf)
 	),)
   endef
 
-  $$(eval $$(call BuildPackage,$(PKG_NAME)-mod-$(1)))
+  $$(eval $$(call BuildPackage,$(PKG_NAME)-mod-$(subst _,-,$(1))))
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
@@ -209,6 +221,7 @@ $(eval $(call BuildPlugin,cache,server,CNAM and LNP memory caches,,,y))
 $(eval $(call BuildPlugin,callcounters,server,Count Active Call Legs,,,y))
 $(eval $(call BuildPlugin,callfork,,Call Forker,,,y))
 $(eval $(call BuildPlugin,callgen,,Call Generator,))
+$(eval $(call BuildPlugin,camel_map,sig,MAP/CAMEL TCAP <-> XML translators,,,y))
 $(eval $(call BuildPlugin,ccongestion,server,Accept Status from Installed Engine Monitors,,,y))
 $(eval $(call BuildPlugin,cdrbuild,,Call Detail Record Builder,,,y))
 $(eval $(call BuildPlugin,cdrcombine,,Call Detail Records per call instead of per call leg,))
@@ -224,6 +237,7 @@ $(eval $(call BuildPlugin,enumroute,,ENUM Routing,,,y))
 $(eval $(call BuildPlugin,eventlogs,server,Write events and alarms to log files,,,y))
 $(eval $(call BuildPlugin,extmodule,,External Module Handler,,/usr/share/yate/scripts/echo.sh,y))
 $(eval $(call BuildPlugin,faxchan,,Spandsp Fax Channel,+libspandsp))
+$(eval $(call BuildPlugin,fileinfo,,File Info Holder,,,y))
 $(eval $(call BuildPlugin,filetransfer,,File Transfer Driver,,,y))
 $(eval $(call BuildPlugin,gvoice,,Google Voice support,,,y))
 $(eval $(call BuildPlugin,heartbeat,server,Linux-HA compatible heartbeat,,,y))
@@ -249,7 +263,7 @@ $(eval $(call BuildPlugin,osschan,client,OSS Sound Channel,))
 $(eval $(call BuildPlugin,park,server,Call Parking,))
 $(eval $(call BuildPlugin,pbx,,PBX Message Handlers,))
 $(eval $(call BuildPlugin,pbxassist,server,Full featured PBX and IVR,,,y))
-$(eval $(call BuildPlugin,pgsqldb,server,PostgrestSQL Backend DB,@!arc +libpq))
+$(eval $(call BuildPlugin,pgsqldb,server,PostgrestSQL Backend DB,+libpq))
 $(eval $(call BuildPlugin,presence,server,Presence,,,y))
 $(eval $(call BuildPlugin,queues,server,Call Distribution and Queues from Database,,,y))
 $(eval $(call BuildPlugin,queuesnotify,server,Notify when queued call status changes,,,y))
@@ -260,6 +274,8 @@ $(eval $(call BuildPlugin,rmanager,,Yate Remote Management,,,y))
 $(eval $(call BuildPlugin,sigtransport,server,SIGTRAN (SS7 over IP) connection provider,,,y))
 $(eval $(call BuildPlugin,sip_cnam_lnp,sip,Query CNAM and LNP databases using SIP INVITE,,,y))
 $(eval $(call BuildPlugin,sipfeatures,server,SIP Features (SUBSCRIBE/NOTIFY),,,y))
+$(eval $(call BuildPlugin,sqlitedb,server,SQLite Support,+libsqlite3,,y))
+$(eval $(call BuildPlugin,ss7_lnp_ansi,sig,Query LNP Databases,,,y))
 $(eval $(call BuildPlugin,subscription,server,Subcription handler and presence notifier,,,y))
 $(eval $(call BuildPlugin,tdmcard,server,TDM Cards Signalling and Data Driver,@BROKEN)) # Missing TDM libraries
 $(eval $(call BuildPlugin,tonedetect,,Detectors for Various Tones,))
@@ -276,5 +292,6 @@ $(eval $(call BuildPlugin,ysipchan,,SIP Channel,,,y))
 $(eval $(call BuildPlugin,ysnmpagent,server,SNMP Protocol Agent,,/usr/share/yate/data/NULL-TEAM-MIB.txt /usr/share/yate/data/snmp_mib.conf /usr/share/yate/data/YATE-MIB.txt,y))
 $(eval $(call BuildPlugin,ysockschan,,SOCKS Channel,,,y))
 $(eval $(call BuildPlugin,ystunchan,,STUN Support,,,y))
+#$(eval $(call BuildPlugin,zapcard,server,Zaptel PRI/TDM/FXS/FXO cards,@!aarch64 +kmod-dahdi,,y))
 $(eval $(call BuildPlugin,zlibcompress,,Zlib Compression,+zlib,,y))
 
