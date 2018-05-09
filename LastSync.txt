@@ -1,4 +1,8 @@
-commit 5eff04c674b0bd13bfcbf2f1e3cd4e5372a5efb3
-Merge: 5f90ebd 9113396
+commit b159ed0cf9b1011f587d15318d107f8bb42d78e1
+Merge: 4289fba 8dd7721
 Author: Jiri Slachta <jiri.slachta@gmail.com>
-Date:   Mon Feb 12 07:05:00 2018 +0100
+Date:   Tue May 1 21:19:05 2018 +0200
+
+    Merge pull request #321 from micmac1/chan-lantiq-fix-target-build
+    
+    asterisk-chan-lantiq: fix dep for nonshared builds
