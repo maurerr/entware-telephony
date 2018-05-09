@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2010-2017 OpenWrt.org
+# Copyright (C) 2010-2018 OpenWrt.org
 # Copyright (C) 2010 Alfred E. Heggestad
 #
 # This is free software, licensed under the GNU General Public License v2.
@@ -9,12 +9,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=baresip
-PKG_VERSION:=0.5.6
-PKG_RELEASE:=5
+PKG_VERSION:=0.5.9
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://www.creytiv.com/pub
-PKG_HASH:=148defef160842e0247af92c84bb0c8de4b36ffa68cf3a87c4cd7e510cddd00c
+PKG_HASH:=eeddcfb9ef800a2d892008bd99a223ea7fa93ba85886cc063c6bb81cb9236e09
 
 PKG_LICENSE:=BSD-3-Clause
 PKG_LICENSE_FILES:=docs/COPYING
@@ -46,7 +46,7 @@ baresip-mods:= \
 	v4l2
 
 PKG_CONFIG_DEPENDS:= \
-	$(patsubst %,CONFIG_PACKAGE_baresip-mod-%,$(baresip-mods)) \
+	$(patsubst %,CONFIG_PACKAGE_baresip-mod-%,$(subst _,-,$(baresip-mods)))
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -94,7 +94,7 @@ baresip-mod-v4l2      := USE_V4L2
 BARESIP_MOD_OPTIONS:= \
 	MOD_AUTODETECT= \
 	EXTRA_MODULES="dtmfio" \
-	$(foreach m,$(baresip-mods),$(baresip-mod-$(m))=$(if $(CONFIG_PACKAGE_baresip-mod-$(m)),1))
+	$(foreach m,$(baresip-mods),$(baresip-mod-$(m))=$(if $(CONFIG_PACKAGE_baresip-mod-$(subst _,-,$(m))),1))
 
 MAKE_FLAGS+= \
 	CROSS_COMPILE="$(TARGET_CROSS)" \
@@ -163,13 +163,13 @@ endef
 
 define BuildPlugin
 
-  define Package/baresip-mod-$(1)
+  define Package/baresip-mod-$(subst _,-,$(1))
     $$(call Package/baresip/Default)
     TITLE:=$(2)
-    DEPENDS:=baresip $(patsubst +%,+PACKAGE_$(PKG_NAME)-mod-$(1):%,$(4))
+    DEPENDS:=baresip $(patsubst +%,+PACKAGE_$(PKG_NAME)-mod-$(subst _,-,$(1)):%,$(4))
   endef
 
-  define Package/baresip-mod-$(1)/install
+  define Package/baresip-mod-$(subst _,-,$(1))/install
 	[ -z "$(3)" ] || $(INSTALL_DIR) $$(1)/usr/lib/baresip/modules
 	for f in $(3); do \
 		$(INSTALL_DATA) \
@@ -178,7 +178,7 @@ define BuildPlugin
 	done
   endef
 
-  $$(eval $$(call BuildPackage,baresip-mod-$(1)))
+  $$(eval $$(call BuildPackage,baresip-mod-$(subst _,-,$(1))))
 endef
 
 $(eval $(call BuildPackage,baresip))
@@ -187,8 +187,9 @@ $(eval $(call BuildPlugin,alsa,ALSA audio driver,alsa,+alsa-lib))
 $(eval $(call BuildPlugin,aubridge,Audio bridge module,aubridge,))
 $(eval $(call BuildPlugin,aufile,Audio module for using a WAV-file as audio input,aufile,))
 $(eval $(call BuildPlugin,avcodec,Video codec using FFmpeg,avcodec,@BARESIP_WITH_FFMPEG +libffmpeg-full +libx264))
-$(eval $(call BuildPlugin,avformat,Video source using FFmpeg,avformat,@BARESIP_WITH_FFMPEG +libffmpeg-full))
+$(eval $(call BuildPlugin,avformat,Video source using FFmpeg,avformat,baresip-mod-avcodec))
 $(eval $(call BuildPlugin,cons,UDP/TCP console UI driver,cons,))
+$(eval $(call BuildPlugin,ctrl_tcp,TCP control interface,ctrl_tcp,))
 $(eval $(call BuildPlugin,debug_cmd,Debug commands,debug_cmd,))
 $(eval $(call BuildPlugin,dtls_srtp,DTLS-SRTP end-to-end encryption,dtls_srtp,))
 $(eval $(call BuildPlugin,dtmfio,DTMF input/output,dtmfio,))
@@ -206,7 +207,7 @@ $(eval $(call BuildPlugin,oss,OSS audio driver,oss,))
 $(eval $(call BuildPlugin,plc,Packet Loss Concealment,plc,+libspandsp))
 $(eval $(call BuildPlugin,portaudio,Portaudio audio driver,portaudio,+portaudio))
 $(eval $(call BuildPlugin,presence,Presence module,presence,))
-$(eval $(call BuildPlugin,pulse,Pulseaudio audio driver,pulse,+pulseaudio-daemon))
+$(eval $(call BuildPlugin,pulse,Pulseaudio audio driver,pulse,+pulseaudio))
 $(eval $(call BuildPlugin,selfview,Video selfview module,selfview,))
 $(eval $(call BuildPlugin,sndfile,Audio dumper using libsndfile,sndfile,+libsndfile))
 $(eval $(call BuildPlugin,speex,Speex audio codec,speex,+libspeex))
