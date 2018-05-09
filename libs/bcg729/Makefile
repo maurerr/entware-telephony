@@ -1,5 +1,5 @@
 # 
-# Copyright (C) 2006-2017 OpenWrt.org
+# Copyright (C) 2006-2018 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=bcg729
 PKG_VERSION:=1.0.4
-PKG_RELEASE:=1
+PKG_RELEASE:=3
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://www.linphone.org/releases/sources/bcg729
@@ -31,7 +31,6 @@ define Package/bcg729
   CATEGORY:=Libraries
   TITLE:=Software G729A encoder and decoder library written in C
   URL:=http://www.linphone.org/technical-corner/bcg729.html
-  DEPENDS:=@BUILD_PATENTED
 endef
 
 define Package/bcg729/description
@@ -41,9 +40,11 @@ define Package/bcg729/description
  source code in any kind.
 endef
 
-TARGET_CFLAGS += $(FPIC)
+# Otherwise OpenWrt's CPPFLAGS are ignored
+TARGET_CFLAGS += $(TARGET_CPPFLAGS)
 
 CMAKE_OPTIONS += \
+	-DCMAKE_VERBOSE_MAKEFILE=TRUE \
 	-DENABLE_SHARED=YES \
 	-DENABLE_STATIC=NO \
 	-DENABLE_TESTS=NO
