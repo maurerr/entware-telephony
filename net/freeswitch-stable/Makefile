@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 PRG_NAME:=freeswitch
 PKG_NAME:=$(PRG_NAME)-stable
 PKG_VERSION:=1.6.20
-PKG_RELEASE:=3
+PKG_RELEASE:=7
 PKG_MAINTAINER:=Sebastian Kemper <sebastian_ml@gmx.net>
 
 PKG_SOURCE:=$(PRG_NAME)-$(PKG_VERSION).tar.xz
@@ -77,46 +77,6 @@ FS_STABLE_TZ_DIR:=$(FS_STABLE_DATA_DIR)/tz
 
 FTDM:=freetdm
 PKG_LIBFTDM:=lib$(FTDM)-stable
-
-LIBFTDM_FTMOD_AVAILABLE:= \
-	analog \
-	analog_em \
-	libpri \
-	pritap \
-	skel \
-	zt
-
-# Maintain a list of all non-module packages so they can be added to
-# PKG_CONFIG_DEPENDS.
-FS_STABLE_MISC_AVAILABLE:= \
-	example-curl \
-	example-insideout \
-	example-minimal \
-	example-rayo \
-	example-sbc \
-	example-softphone \
-	example-testing \
-	example-vanilla \
-	lang-de \
-	lang-en \
-	lang-es \
-	lang-fr \
-	lang-he \
-	lang-pt \
-	lang-ru \
-	lang-sv \
-	misc-fonts \
-	misc-grammar \
-	misc-hotplug \
-	misc-images \
-	misc-perl-esl \
-	misc-python-esl \
-	misc-timezones \
-	util-fs_cli \
-	util-fs_encode \
-	util-fs_ivrd \
-	util-gentls_cert \
-	util-tone2wav
 
 FS_STABLE_MOD_AVAILABLE:= \
 	abstraction \
@@ -258,25 +218,26 @@ FS_STABLE_MOD_AVAILABLE:= \
 	yuv
 
 PKG_CONFIG_DEPENDS:= \
-	$(patsubst %,CONFIG_PACKAGE_$(PKG_LIBFTDM)-ftmod-%,$(LIBFTDM_FTMOD_AVAILABLE)) \
-	$(patsubst %,CONFIG_PACKAGE_$(PKG_NAME)-%,$(FS_STABLE_MISC_AVAILABLE)) \
-	$(patsubst %,CONFIG_PACKAGE_$(PKG_NAME)-mod-%,$(FS_STABLE_MOD_AVAILABLE)) \
+	$(patsubst %,CONFIG_PACKAGE_$(PKG_NAME)-mod-%,$(subst _,-,$(FS_STABLE_MOD_AVAILABLE))) \
 	CONFIG_FS_STABLE_WITH_DEBUG \
 	CONFIG_FS_STABLE_WITH_FREETYPE \
 	CONFIG_FS_STABLE_WITH_LIBYUV \
-	CONFIG_FS_STABLE_WITH_MODCONF \
 	CONFIG_FS_STABLE_WITH_ODBC \
 	CONFIG_FS_STABLE_WITH_PGSQL \
 	CONFIG_FS_STABLE_WITH_PNG \
 	CONFIG_FS_STABLE_WITH_SRTP \
-	CONFIG_FS_STABLE_WITH_V8 \
 	CONFIG_FS_STABLE_WITH_V8_SNAPSHOT \
 	CONFIG_FS_STABLE_WITH_VPX \
 	CONFIG_FS_STABLE_WITH_ZRTP \
 	CONFIG_LIBC \
 	CONFIG_PACKAGE_$(PKG_LIBFTDM) \
+	CONFIG_PACKAGE_$(PKG_LIBFTDM)-ftmod-libpri \
+	CONFIG_PACKAGE_$(PKG_LIBFTDM)-ftmod-pritap \
+	CONFIG_PACKAGE_$(PKG_NAME)-misc-perl-esl \
+	CONFIG_PACKAGE_$(PKG_NAME)-misc-python-esl \
 	CONFIG_SOFT_FLOAT
 
+include $(INCLUDE_DIR)/uclibc++.mk
 include $(INCLUDE_DIR)/package.mk
 
 FS_STABLE_PERL_FEED:=$(TOPDIR)/feeds/packages/lang/perl
@@ -371,19 +332,19 @@ $(call Package/$(PKG_NAME)/install/lib,$(1),lib$(FTDM))
 endef
 
 define Package/$(PKG_LIBFTDM)/FTModule
-define Package/$(PKG_LIBFTDM)-ftmod-$(1)
+define Package/$(PKG_LIBFTDM)-ftmod-$(subst _,-,$(1))
 $(call Package/$(PKG_LIBFTDM)/Default)
-  DEPENDS:=PACKAGE_$(PKG_LIBFTDM)-ftmod-$(1):$(PKG_LIBFTDM) \
-	  $(patsubst +%,+PACKAGE_$(PKG_LIBFTDM)-ftmod-$(1):%,$(4))
+  DEPENDS:=PACKAGE_$(PKG_LIBFTDM)-ftmod-$(subst _,-,$(1)):$(PKG_LIBFTDM) \
+	  $(patsubst +%,+PACKAGE_$(PKG_LIBFTDM)-ftmod-$(subst _,-,$(1)):%,$(4))
   TITLE:=$(2) FreeTDM module
 endef
-define Package/$(PKG_LIBFTDM)-ftmod-$(1)/description
+define Package/$(PKG_LIBFTDM)-ftmod-$(subst _,-,$(1))/description
 $(subst \n,$(newline),$(3))
 endef
-define Package/$(PKG_LIBFTDM)-ftmod-$(1)/install
+define Package/$(PKG_LIBFTDM)-ftmod-$(subst _,-,$(1))/install
 $(call Package/$(PKG_LIBFTDM)/install/ftmod,$$(1),$(1))
 endef
-$$(eval $$(call BuildPackage,$(PKG_LIBFTDM)-ftmod-$(1)))
+$$(eval $$(call BuildPackage,$(PKG_LIBFTDM)-ftmod-$(subst _,-,$(1))))
 endef
 
 define Package/$(PKG_NAME)/Default
@@ -399,6 +360,7 @@ $(call Package/$(PKG_NAME)/Default)
   MENU:=1
   USERID:=$(PRG_NAME)=372:$(PRG_NAME)=372
   DEPENDS:= \
+	  $(CXX_DEPENDS) \
 	  +FS_STABLE_WITH_FREETYPE:libfreetype \
 	  +FS_STABLE_WITH_ODBC:unixodbc \
 	  +FS_STABLE_WITH_PGSQL:libpq \
@@ -413,7 +375,6 @@ $(call Package/$(PKG_NAME)/Default)
 	  +libspeex \
 	  +libspeexdsp \
 	  +libsqlite3 \
-	  +libstdcpp \
 	  +libuuid \
 	  +zlib
   CONFLICTS:=$(PRG_NAME)
@@ -571,45 +532,45 @@ define Package/$(PKG_NAME)-misc-timezones/install
 endef
 
 define Package/$(PKG_NAME)/Example
-define Package/$(PKG_NAME)-example-$(1)
+define Package/$(PKG_NAME)-example-$(subst _,-,$(1))
 $(call Package/$(PKG_NAME)/Default)
   TITLE:=Example configuration
   DEPENDS:=$(PKG_NAME)
   PKGARCH:=all
 endef
-define Package/$(PKG_NAME)-example-$(1)/description
+define Package/$(PKG_NAME)-example-$(subst _,-,$(1))/description
 This package does not install any configuration for FreeSWITCH into
 /etc/freeswitch. The system administrator is completely responsible
 for that directory. If you install one of the example configuration
 packages, it will install the corresponding sample configuration to
 /usr/share/freeswitch/examples where you can take a look at it.
 endef
-define Package/$(PKG_NAME)-example-$(1)/install
+define Package/$(PKG_NAME)-example-$(subst _,-,$(1))/install
 $(call Package/$(PKG_NAME)/install/dir,$$(1)$(FS_STABLE_EXAMPLES_DIR)/$(1),$(PKG_BUILD_DIR)/conf/$(1))
 endef
-$$(eval $$(call BuildPackage,$(PKG_NAME)-example-$(1)))
+$$(eval $$(call BuildPackage,$(PKG_NAME)-example-$(subst _,-,$(1))))
 endef
 
 define Package/$(PKG_NAME)/Language
-define Package/$(PKG_NAME)-lang-$(1)
+define Package/$(PKG_NAME)-lang-$(subst _,-,$(1))
 $(call Package/$(PKG_NAME)/Default)
   TITLE:=$(2) language files
   DEPENDS:=$(PKG_NAME)
   PKGARCH:=all
 endef
-define Package/$(PKG_NAME)-lang-$(1)/description
+define Package/$(PKG_NAME)-lang-$(subst _,-,$(1))/description
 This package includes the $(2) language files for FreeSWITCH.
 endef
-define Package/$(PKG_NAME)-lang-$(1)/install
+define Package/$(PKG_NAME)-lang-$(subst _,-,$(1))/install
 $(call Package/$(PKG_NAME)/install/dir,$$(1)$(FS_STABLE_LANG_DIR)/$(1),$(PKG_BUILD_DIR)/conf/vanilla/lang/$(1))
 endef
-$$(eval $$(call BuildPackage,$(PKG_NAME)-lang-$(1)))
+$$(eval $$(call BuildPackage,$(PKG_NAME)-lang-$(subst _,-,$(1))))
 endef
 
 # The next package generator is for miscellaneous files that only
 # require being copied from PKG_INSTALL_DIR to the ipkg.
 define Package/$(PKG_NAME)/Misc
-define Package/$(PKG_NAME)-$(1)
+define Package/$(PKG_NAME)-$(subst _,-,$(1))
 $(call Package/$(PKG_NAME)/Default)
   TITLE:=$(2)
   DEPENDS:=$(PKG_NAME)
@@ -617,25 +578,25 @@ $(call Package/$(PKG_NAME)/Default)
   PKGARCH:=all
   endif
 endef
-define Package/$(PKG_NAME)-$(1)/description
+define Package/$(PKG_NAME)-$(subst _,-,$(1))/description
 $(subst \n,$(newline),$(3))
 endef
-define Package/$(PKG_NAME)-$(1)/install
+define Package/$(PKG_NAME)-$(subst _,-,$(1))/install
 $(call Package/$(PKG_NAME)/install/dir,$$(1)$(5),$(PKG_INSTALL_DIR)$(4))
 endef
-$$(eval $$(call BuildPackage,$(PKG_NAME)-$(1)))
+$$(eval $$(call BuildPackage,$(PKG_NAME)-$(subst _,-,$(1))))
 endef
 
 define Package/$(PKG_NAME)/Module
-define Package/$(PKG_NAME)-mod-$(1)
+define Package/$(PKG_NAME)-mod-$(subst _,-,$(1))
 $(call Package/$(PKG_NAME)/Default)
   TITLE:=$(2) module
-  DEPENDS:=$(PKG_NAME) $(patsubst +%,+PACKAGE_$(PKG_NAME)-mod-$(1):%,$(4))
+  DEPENDS:=$(PKG_NAME) $(patsubst +%,+PACKAGE_$(PKG_NAME)-mod-$(subst _,-,$(1)):%,$(4))
 endef
-define Package/$(PKG_NAME)-mod-$(1)/description
+define Package/$(PKG_NAME)-mod-$(subst _,-,$(1))/description
 $(subst \n,$(newline),$(3))
 endef
-define Package/$(PKG_NAME)-mod-$(1)/install
+define Package/$(PKG_NAME)-mod-$(subst _,-,$(1))/install
 $(call Package/$(PKG_NAME)/install/mod,$$(1),$(1))
 ifeq ($(CONFIG_FS_STABLE_WITH_MODCONF),y)
 $(call Package/$(PKG_NAME)/install/dir,$$(1)$(FS_STABLE_EXAMPLES_DIR)/mod_$(1),$(PKG_BUILD_DIR)/src/mod/*/mod_$(1)/conf)
@@ -656,25 +617,25 @@ ifeq ($(1),python)
 					$$(1)$(FS_STABLE_PYTHON_SITE_DIR)
 endif
 endef
-$$(eval $$(call BuildPackage,$(PKG_NAME)-mod-$(1)))
+$$(eval $$(call BuildPackage,$(PKG_NAME)-mod-$(subst _,-,$(1))))
 endef
 
 define Package/$(PKG_NAME)/Util
-define Package/$(PKG_NAME)-util-$(1)
+define Package/$(PKG_NAME)-util-$(subst _,-,$(1))
 $(call Package/$(PKG_NAME)/Default)
   TITLE:=$(2) utility
-  DEPENDS:=$(PKG_NAME) $(patsubst +%,+PACKAGE_$(PKG_NAME)-util-$(1):%,$(4))
+  DEPENDS:=$(PKG_NAME) $(patsubst +%,+PACKAGE_$(PKG_NAME)-util-$(subst _,-,$(1)):%,$(4))
   ifeq ($(5),y)
   PKGARCH:=all
   endif
 endef
-define Package/$(PKG_NAME)-util-$(1)/description
+define Package/$(PKG_NAME)-util-$(subst _,-,$(1))/description
 $(subst \n,$(newline),$(3))
 endef
-define Package/$(PKG_NAME)-util-$(1)/install
+define Package/$(PKG_NAME)-util-$(subst _,-,$(1))/install
 $(call Package/$(PKG_NAME)/install/bin,$$(1),$(1))
 endef
-$$(eval $$(call BuildPackage,$(PKG_NAME)-util-$(1)))
+$$(eval $$(call BuildPackage,$(PKG_NAME)-util-$(subst _,-,$(1))))
 endef
 
 CONFIGURE_ARGS+= \
@@ -713,7 +674,7 @@ CONFIGURE_ARGS+= \
 	--with-python=no
 endif
 
-ifeq ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-erlang_event)$(CONFIG_PACKAGE_$(PKG_NAME)-mod-kazoo),)
+ifeq ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-erlang-event)$(CONFIG_PACKAGE_$(PKG_NAME)-mod-kazoo),)
 CONFIGURE_ARGS+= \
 	--with-erlang=no
 endif
@@ -781,9 +742,9 @@ CONFIGURE_VARS+= \
 	PERL="$(PERL_CMD)" \
 	PERL_CFLAGS="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_GNU_SOURCE -I$(STAGING_DIR)$(PERL_SITELIB)/CORE" \
 	PERL_INC="-I$(STAGING_DIR)$(PERL_SITELIB)/CORE" \
-	PERL_LDFLAGS="$(FPIC) -Wl,-rpath,$(PERL_SITELIB)/CORE -L$(STAGING_DIR)$(PERL_SITELIB)/CORE -lperl" \
+	PERL_LDFLAGS="-Wl,-rpath,$(PERL_SITELIB)/CORE -L$(STAGING_DIR)$(PERL_SITELIB)/CORE -lperl" \
 	PERL_LIBDIR="-L$(PERL_SITELIB)/CORE" \
-	PERL_LIBS="-lpthread $(FS_STABLE_PERL_LIBS) $(EXTRA_LIBDIRS:%=-L%) $(EXTRA_LIBS:%=-l%)" \
+	PERL_LIBS="$(FS_STABLE_PERL_LIBS) $(EXTRA_LIBDIRS:%=-L%) $(EXTRA_LIBS:%=-l%)" \
 	PERL_SITEDIR="$(PERL_SITELIB)"
 else
 CONFIGURE_VARS+= \
@@ -794,7 +755,7 @@ endif
 ifneq ($(CONFIG_PACKAGE_$(PKG_NAME)-misc-python-esl)$(CONFIG_PACKAGE_$(PKG_NAME)-mod-python),)
 CONFIGURE_VARS+= \
 	PYTHON_CFLAGS="-I$(STAGING_DIR)/usr/include/python$(PYTHON_VERSION)" \
-	PYTHON_LDFLAGS="-lpython$(PYTHON_VERSION) -ldl -lpthread -lm -Xlinker -export-dynamic" \
+	PYTHON_LDFLAGS="-lpython$(PYTHON_VERSION)" \
 	PYTHON_LIB="python$(PYTHON_VERSION)" \
 	PYTHON_LIBDIR="$(FS_STABLE_LIB_DIR)" \
 	PYTHON_SITE_DIR="$(FS_STABLE_PYTHON_SITE_DIR)"
@@ -917,7 +878,7 @@ FS_STABLE_FREERADIUS_CLIENT_HASH:=3fc609af328258e00345389d5478b099fe4ea3ad694d04
 FS_STABLE_V8_FILE:=v8-3.24.14.tar.bz2
 FS_STABLE_V8_HASH:=395f4eaf5580b973b1e33fe0aa27f8d013ddf1b163ad76992c50dd91ff182828
 
-ifneq ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-event_zmq),)
+ifneq ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-event-zmq),)
 $(eval $(call Download/files,zmq,$(FS_STABLE_ZEROMQ_FILE),$(FS_STABLE_ZEROMQ_URL),$(FS_STABLE_ZEROMQ_HASH)))
 endif
 
@@ -927,7 +888,7 @@ $(eval $(call Download/files,sphinxbase,$(FS_STABLE_SPHINXBASE_FILE),$(FS_STABLE
 $(eval $(call Download/files,communicator,$(FS_STABLE_SPHINXMODEL_FILE),$(FS_STABLE_LIBS_URL),$(FS_STABLE_SPHINXMODEL_HASH)))
 endif
 
-ifneq ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-radius_cdr),)
+ifneq ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-radius-cdr),)
 $(eval $(call Download/files,freeradius-client,$(FS_STABLE_FREERADIUS_CLIENT_FILE),$(FS_STABLE_LIBS_URL),$(FS_STABLE_FREERADIUS_CLIENT_HASH)))
 endif
 
@@ -949,31 +910,16 @@ define Build/Prepare
 	echo '#applications/mod_random' >> $(PKG_BUILD_DIR)/modules.conf
 	echo '#codecs/mod_yuv' >> $(PKG_BUILD_DIR)/modules.conf
 	echo '#event_handlers/mod_event_test' >> $(PKG_BUILD_DIR)/modules.conf
-	$(SED) '/^#/!s/^/#/' $(PKG_BUILD_DIR)/modules.conf
-	$(foreach m,$(FS_STABLE_MOD_AVAILABLE),
-		$(if $(CONFIG_PACKAGE_$(PKG_NAME)-mod-$(m)),
-		$(SED) '/mod_$(m)$$$$/s/^#//' $(PKG_BUILD_DIR)/modules.conf))
 
 	$(SED) 's|$(FS_STABLE_ANCHOR)|APR_SETVAR(LDFLAGS,$(FS_STABLE_APR_LIBS) $(TARGET_LDFLAGS))|' \
 		$(PKG_BUILD_DIR)/libs/unimrcp/build/acmacros/apr.m4
+endef
 
-ifneq ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-event_zmq),)
-	$(CP) $(DL_DIR)/$(FS_STABLE_ZEROMQ_FILE) $(PKG_BUILD_DIR)/libs
-endif
-
-ifneq ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-pocketsphinx)$(CONFIG_PACKAGE_$(PKG_NAME)-misc-grammar),)
-	$(CP) $(DL_DIR)/$(FS_STABLE_POCKETSPHINX_FILE) $(PKG_BUILD_DIR)/libs
-	$(CP) $(DL_DIR)/$(FS_STABLE_SPHINXBASE_FILE) $(PKG_BUILD_DIR)/libs
-	$(CP) $(DL_DIR)/$(FS_STABLE_SPHINXMODEL_FILE) $(PKG_BUILD_DIR)/libs
-endif
-
-ifneq ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-radius_cdr),)
-	$(CP) $(DL_DIR)/$(FS_STABLE_FREERADIUS_CLIENT_FILE) $(PKG_BUILD_DIR)/libs
-endif
-
-ifneq ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-v8),)
-	$(CP) $(DL_DIR)/$(FS_STABLE_V8_FILE) $(PKG_BUILD_DIR)/libs
-endif
+define Build/Configure
+	$(SED) '/^#/!s/^/#/' $(PKG_BUILD_DIR)/modules.conf
+	$(foreach m,$(FS_STABLE_MOD_AVAILABLE),
+		$(if $(CONFIG_PACKAGE_$(PKG_NAME)-mod-$(subst _,-,$(m))),
+		$(SED) '/mod_$(m)$$$$/s/^#//' $(PKG_BUILD_DIR)/modules.conf))
 
 # Hack for misc-grammar - needs mod_pocketsphinx to provide grammar files
 ifneq ($(CONFIG_PACKAGE_$(PKG_NAME)-misc-grammar),)
@@ -995,9 +941,30 @@ ifeq ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-sofia),)
 	$(SED) '/mod_sofia$$$$/s/^#//' $(PKG_BUILD_DIR)/modules.conf
 endif
 endif
+
+	$(call Build/Configure/Default)
 endef
 
 define Build/Compile
+# Copy some source files if certain modules are selected
+ifneq ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-event-zmq),)
+	$(CP) $(DL_DIR)/$(FS_STABLE_ZEROMQ_FILE) $(PKG_BUILD_DIR)/libs
+endif
+
+ifneq ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-pocketsphinx)$(CONFIG_PACKAGE_$(PKG_NAME)-misc-grammar),)
+	$(CP) $(DL_DIR)/$(FS_STABLE_POCKETSPHINX_FILE) $(PKG_BUILD_DIR)/libs
+	$(CP) $(DL_DIR)/$(FS_STABLE_SPHINXBASE_FILE) $(PKG_BUILD_DIR)/libs
+	$(CP) $(DL_DIR)/$(FS_STABLE_SPHINXMODEL_FILE) $(PKG_BUILD_DIR)/libs
+endif
+
+ifneq ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-radius-cdr),)
+	$(CP) $(DL_DIR)/$(FS_STABLE_FREERADIUS_CLIENT_FILE) $(PKG_BUILD_DIR)/libs
+endif
+
+ifneq ($(CONFIG_PACKAGE_$(PKG_NAME)-mod-v8),)
+	$(CP) $(DL_DIR)/$(FS_STABLE_V8_FILE) $(PKG_BUILD_DIR)/libs
+endif
+
 # Compile FreeTDM first
 ifneq ($(CONFIG_PACKAGE_$(PKG_LIBFTDM)),)
 	$(call Build/Compile/Default,-C $(PKG_BUILD_DIR)/libs/$(FTDM))
@@ -1175,7 +1142,7 @@ $(eval $(call Package/$(PKG_NAME)/Module,esl,Single ESL,This module adds an API 
 $(eval $(call Package/$(PKG_NAME)/Module,event_multicast,Multicast Event,Multicast Event System for FreeSWITCH.,))
 $(eval $(call Package/$(PKG_NAME)/Module,event_socket,Event socket,Sends events via a single socket. Needed for fs_cli.,))
 $(eval $(call Package/$(PKG_NAME)/Module,event_test,Event test,Event demo module.,))
-$(eval $(call Package/$(PKG_NAME)/Module,event_zmq,ZMQ event,ZMQ event module.,))
+$(eval $(call Package/$(PKG_NAME)/Module,event_zmq,ZMQ event,ZMQ event module.,@!USE_UCLIBCXX))
 $(eval $(call Package/$(PKG_NAME)/Module,expr,Expr,This module adds expr support for expression evaluation.,))
 $(eval $(call Package/$(PKG_NAME)/Module,fifo,FIFO,This module adds a first-in first-out queue system.,))
 $(eval $(call Package/$(PKG_NAME)/Module,format_cdr,Multiformat CDR,A superset of mod_json_cdr and mod_xml_cdr.,))
@@ -1259,7 +1226,7 @@ $(eval $(call Package/$(PKG_NAME)/Module,tone_stream,Tone stream,Tone generation
 $(eval $(call Package/$(PKG_NAME)/Module,translate,Number translation,This module implements number translation.,))
 $(eval $(call Package/$(PKG_NAME)/Module,tts_commandline,TTS command-line,Run a command-line and play the output file.,))
 $(eval $(call Package/$(PKG_NAME)/Module,unimrcp,UniMRCP,Allows communication with Media Resource Control Protocol servers.,))
-$(eval $(call Package/$(PKG_NAME)/Module,v8,V8,This package contains mod_v8 for FreeSWITCH.,@FS_STABLE_WITH_V8 @arm||i386||mipsel||x86_64))
+$(eval $(call Package/$(PKG_NAME)/Module,v8,V8,This package contains mod_v8 for FreeSWITCH.,@!USE_UCLIBCXX @FS_STABLE_WITH_V8 @arm||i386||mipsel||x86_64))
 $(eval $(call Package/$(PKG_NAME)/Module,valet_parking,Valet parking,This module implements the valet call parking strategy.,))
 $(eval $(call Package/$(PKG_NAME)/Module,verto,Verto,Verto signaling protocol.,))
 $(eval $(call Package/$(PKG_NAME)/Module,vmd,Voicemail detection,This module detects voicemail beeps.,))
@@ -1284,7 +1251,7 @@ $(eval $(call Package/$(PKG_NAME)/Module,yuv,Raw YUV,Raw YUV I420 video codec su
 ################################
 
 $(eval $(call Package/$(PKG_NAME)/Util,fs_cli,CLI,The fs_cli program is a Command-Line Interface that allows a user to\nconnect to a FreeSWITCH instance running on the local or a remote\nsystem.,,n))
-$(eval $(call Package/$(PKG_NAME)/Util,fs_encode,Sound file conversion,Format conversion of sound files so the result can be used by\nmod_native_file.,+$(PKG_NAME)-mod-native_file +$(PKG_NAME)-mod-sndfile +$(PKG_NAME)-mod-spandsp,n))
+$(eval $(call Package/$(PKG_NAME)/Util,fs_encode,Sound file conversion,Format conversion of sound files so the result can be used by\nmod_native_file.,+$(PKG_NAME)-mod-native-file +$(PKG_NAME)-mod-sndfile +$(PKG_NAME)-mod-spandsp,n))
 $(eval $(call Package/$(PKG_NAME)/Util,fs_ivrd,IVR daemon,The FreeSWITCH IVR daemon is an abstraction layer that sits on top of\nthe ESL. The basic idea is that the ivrd will allow the user to have\na STDIN/STDOUT interface for simple call control.,,n))
 $(eval $(call Package/$(PKG_NAME)/Util,gentls_cert,TLS certificate,Can be used to create TLS certificates and setup CAs.,+openssl-util,y))
 $(eval $(call Package/$(PKG_NAME)/Util,tone2wav,Sound file generation,Generates a sound file from a teletone script. The output can be in\nany format that is supported by libsndfile.,+$(PKG_NAME)-mod-sndfile,n))
