@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2014 OpenWrt.org
+# Copyright (C) 2014 - 2018 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=spandsp
 PKG_VERSION:=0.0.6
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://www.soft-switch.org/downloads/spandsp
@@ -33,23 +33,21 @@ define Package/libspandsp
   DEPENDS:=+libtiff
 endef
 
-TARGET_CFLAGS += $(FPIC)
-
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/opt/lib
 	$(CP) $(PKG_INSTALL_DIR)/opt/lib/libspandsp* $(1)/opt/lib/
 
 	$(INSTALL_DIR) $(1)/opt/include
-	$(CP) $(PKG_INSTALL_DIR)/opt/include/spandsp.h $(1)/opt/include/
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/opt/include/spandsp.h $(1)/opt/include/
 
 	$(INSTALL_DIR) $(1)/opt/include/spandsp
-	$(CP) $(PKG_INSTALL_DIR)/opt/include/spandsp/*.h $(1)/opt/include/spandsp/
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/opt/include/spandsp/*.h $(1)/opt/include/spandsp/
 
 	$(INSTALL_DIR) $(1)/opt/include/spandsp/private
-	$(CP) $(PKG_INSTALL_DIR)/opt/include/spandsp/private/*.h $(1)/opt/include/spandsp/private/
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/opt/include/spandsp/private/*.h $(1)/opt/include/spandsp/private/
 
 	$(INSTALL_DIR) $(1)/opt/lib/pkgconfig
-	$(CP) $(PKG_INSTALL_DIR)/opt/lib/pkgconfig/spandsp.pc $(1)/opt/lib/pkgconfig/
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/opt/lib/pkgconfig/spandsp.pc $(1)/opt/lib/pkgconfig/
 endef
 
 define Package/libspandsp/install
