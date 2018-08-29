@@ -11,7 +11,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=chan-sccp
 PKG_VERSION:=v4.3.0-20180322
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://github.com/chan-sccp/chan-sccp.git
@@ -31,14 +31,8 @@ PKG_INSTALL:=1
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(BUILD_VARIANT)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
-
-# musl and glibc include their own iconv, but uclibc does not
-ifneq ($(CONFIG_USE_UCLIBC),)
-TARGET_CPPFLAGS+= \
-	-I$(STAGING_DIR)/opt/lib/libiconv-full/include
-TARGET_LDFLAGS+= \
-	-L$(STAGING_DIR)/opt/lib/libiconv-full/lib -liconv
-endif
+# chan-sccp needs iconv
+include $(INCLUDE_DIR)/nls.mk
 
 define Package/chan-sccp/Default
   SUBMENU:=Telephony
@@ -46,8 +40,7 @@ define Package/chan-sccp/Default
   CATEGORY:=Network
   TITLE:=SCCP channel support
   URL:=https://github.com/chan-sccp/chan-sccp
-  DEPENDS:=+USE_UCLIBC:libiconv-full +libltdl
-  PKG_BUILD_DEPENDS:=libiconv
+  DEPENDS:=$(ICONV_DEPENDS) +libltdl
 endef
 
 define Package/asterisk11-chan-sccp
