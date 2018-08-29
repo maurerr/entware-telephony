@@ -1,8 +1,8 @@
-commit b159ed0cf9b1011f587d15318d107f8bb42d78e1
-Merge: 4289fba 8dd7721
-Author: Jiri Slachta <jiri.slachta@gmail.com>
-Date:   Tue May 1 21:19:05 2018 +0200
+commit f14a417ae332fca35f5b020ce964c105557a742f
+Merge: de2ac6f 8dc9a37
+Author: micmac1 <sebastian_ml@gmx.net>
+Date:   Sun Aug 26 20:13:55 2018 +0200
 
-    Merge pull request #321 from micmac1/chan-lantiq-fix-target-build
+    Merge pull request #368 from micmac1/fs-cpe
     
-    asterisk-chan-lantiq: fix dep for nonshared builds
+    freeswitch-stable: add PKG_CPE_ID
