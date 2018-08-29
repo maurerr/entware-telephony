@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=asterisk15
 PKG_VERSION:=15.3.0
-PKG_RELEASE:=1
+PKG_RELEASE:=3
 
 PKG_SOURCE:=asterisk-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://downloads.asterisk.org/pub/telephony/asterisk/releases
@@ -321,6 +321,8 @@ PKG_CONFIG_DEPENDS:= \
 include $(INCLUDE_DIR)/uclibc++.mk
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/host-build.mk
+# Needed for res-config-mysql and func-iconv to find iconv
+include $(INCLUDE_DIR)/nls.mk
 
 define Package/asterisk15/install/module
 	$(INSTALL_DIR) $(1)/usr/lib/asterisk/modules
@@ -360,7 +362,7 @@ define BuildAsterisk15Module
   define Package/asterisk15-$(1)
   $$(call Package/asterisk15/Default)
     TITLE:=$(2) support
-    DEPENDS:= asterisk15 $(patsubst +%,+PACKAGE_asterisk15-$(1):%,$(4))
+    DEPENDS:= asterisk15 $(patsubst +%,+PACKAGE_asterisk15-$(1):%,$(4)) $(9)
     ifneq ($$(CONFIG_PACKAGE_asterisk15-$(1)),)
     AST_ENABLE+=$(6)
     endif
@@ -557,8 +559,7 @@ CONFIGURE_ARGS+= \
 	$(if $(CONFIG_PACKAGE_$(PKG_NAME)-res-resolver-unbound),--with-unbound="$(STAGING_DIR)/usr",--without-unbound) \
 	$(if $(CONFIG_PACKAGE_$(PKG_NAME)-format-ogg-vorbis),--with-vorbis="$(STAGING_DIR)/usr",--without-vorbis) \
 	--without-vpb \
-	--with-z="$(STAGING_DIR)/usr" \
-	--with-sounds-cache="$(DL_DIR)"
+	--with-z="$(STAGING_DIR)/usr"
 
 ifeq ($(CONFIG_PACKAGE_$(PKG_NAME)-codec-speex)$(CONFIG_PACKAGE_$(PKG_NAME)-format-ogg-speex)$(CONFIG_PACKAGE_$(PKG_NAME)-func-speex),)
 CONFIGURE_ARGS+= \
@@ -725,7 +726,7 @@ endef
 #$(eval $(call BuildPackage,asterisk15))
 #$(eval $(call BuildPackage,asterisk15-sounds))
 
-################################
+#######################################
 # AST modules
 # Params:
 # 1 - Package subname
@@ -736,8 +737,9 @@ endef
 # 6 - module files
 # 7 - sound files
 # 8 - binary files
-################################
-#$(eval $(call BuildAsterisk15Module,subname,title,module description,module dependencies,conf files,module files,sound files,binary files))
+# 9 - complex depends (passed on as is)
+#######################################
+#$(eval $(call BuildAsterisk15Module,subname,title,module description,module dependencies,conf files,module files,sound files,binary files,complex depends))
 
 #$(eval $(call BuildAsterisk15Module,app-adsiprog,ADSI programming,program Asterisk ADSI scripts into phone,+$(PKG_NAME)-res-adsi,adsi.conf asterisk.adsi telcordia-1.adsi,app_adsiprog,,))
 #$(eval $(call BuildAsterisk15Module,app-agent-pool,Call center agent pool,call center agent pool,,agents.conf,app_agent_pool,,))
@@ -882,7 +884,7 @@ endef
 #$(eval $(call BuildAsterisk15Module,func-groupcount,Group count,for counting number of channels in the specified group,,,func_groupcount,,))
 #$(eval $(call BuildAsterisk15Module,func-hangupcause,HANGUPCAUSE related functions,functions related to retreiving per-channel hangupcause information,,,func_hangupcause,,))
 #$(eval $(call BuildAsterisk15Module,func-holdintercept,Hold interception dialplan function,function that intercepts HOLD frames from channels and raises events,,,func_holdintercept,,))
-#$(eval $(call BuildAsterisk15Module,func-iconv,Charset conversion,charset conversion,@!USE_UCLIBC,,func_iconv,,))
+#$(eval $(call BuildAsterisk15Module,func-iconv,Charset conversion,charset conversion,,,func_iconv,,,$(ICONV_DEPENDS)))
 #$(eval $(call BuildAsterisk15Module,func-jitterbuffer,Jitter buffer for read side of channel,put a jitterbuffer on the read side of a channel,,,func_jitterbuffer,,))
 #$(eval $(call BuildAsterisk15Module,func-lock,Dialplan mutexes,dialplan mutexes,,,func_lock,,))
 #$(eval $(call BuildAsterisk15Module,func-math,Math functions,Math functions,,,func_math,,))
