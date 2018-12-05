@@ -9,21 +9,19 @@ include $(TOPDIR)/rules.mk
 
 PRG_NAME:=freeswitch
 PKG_NAME:=$(PRG_NAME)-stable
-PKG_VERSION:=1.8.1
-PKG_RELEASE:=6
+PKG_VERSION:=1.8.2
+PKG_RELEASE:=2
 PKG_MAINTAINER:=Sebastian Kemper <sebastian_ml@gmx.net>
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://$(PRG_NAME).org/stash/scm/fs/$(PRG_NAME).git
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_VERSION:=b33bc925c52b19eda0cafc079015f5bac8fe68d1
+PKG_SOURCE:=$(PRG_NAME)-$(PKG_VERSION).tar.xz
+PKG_SOURCE_URL := \
+	https://sources.openwrt.org/ \
+	https://files.$(PRG_NAME).org/releases/$(PRG_NAME)
+PKG_HASH:=ebcf3db970ea9bb534c0983a1c9eef88395deb6e0902d8d6407bf217b2f27b9a
 
 PKG_CPE_ID:=cpe:/a:freeswitch:freeswitch
 
-PKG_MIRROR_HASH:=8587be34ea2194c64cdb0e19ce84519d260fb529ac40d4a7f7eb62b1fe3ef9b2
-
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PRG_NAME)-$(PKG_VERSION)
 
 # configure in libs/spandsp fails without libjpeg and tiff
 PKG_BUILD_DEPENDS:= \
@@ -416,10 +414,13 @@ $(call Package/$(PKG_NAME)/install/lib,$(1),lib$(PRG_NAME))
 	$(INSTALL_DIR) $(1)$(FS_STABLE_SCRIPTS_DIR)
 	$(INSTALL_DIR) $(1)$(FS_STABLE_SOUNDS_DIR)
 	$(INSTALL_DIR) $(1)$(FS_STABLE_SYSCONF_DIR)/config
+	$(INSTALL_DIR) $(1)$(FS_STABLE_SYSCONF_DIR)/hotplug.d/iface
 	$(INSTALL_DIR) $(1)$(FS_STABLE_SYSCONF_DIR)/init.d
 	$(INSTALL_DIR) $(1)$(FS_STABLE_TLS_DIR)
 	$(INSTALL_BIN) ./files/$(PRG_NAME).init \
 		$(1)$(FS_STABLE_SYSCONF_DIR)/init.d/$(PRG_NAME)
+	$(INSTALL_BIN) ./files/$(PRG_NAME).hotplug \
+		$(1)$(FS_STABLE_SYSCONF_DIR)/hotplug.d/iface/90-$(PRG_NAME)
 	$(INSTALL_CONF) ./files/$(PRG_NAME).config \
 		$(1)$(FS_STABLE_SYSCONF_DIR)/config/$(PRG_NAME)
 endef
@@ -427,49 +428,27 @@ endef
 define Package/$(PKG_NAME)/postinst
 #!/bin/sh
 if [ -z "$${IPKG_INSTROOT}" ]; then
-  # Prevent $(PRG_NAME) from auto-starting after an upgrade. The modules may
-  # not be upgraded yet and the user configuration may need a revision.
-  uci set freeswitch.general.enabled=0
-  uci commit freeswitch
-
   echo
   echo "o-------------------------------------------------------------------o"
   echo "| FreeSWITCH note                                                   |"
   echo "o-------------------------------------------------------------------o"
   echo "| Edit /etc/config/freeswitch to change basic init configuration.   |"
+  echo "|                                                                   |"
+  echo "| Also visit the Wiki at:                                           |"
+  echo "| https://openwrt.org/docs/guide-user/services/voip/freeswitch      |"
   echo "o-------------------------------------------------------------=^_^=-o"
   echo
-fi
-exit 0
-endef
-
-define Package/$(PKG_NAME)-misc-hotplug
-$(call Package/$(PKG_NAME)/Default)
-  TITLE:=Hotplug script
-  DEPENDS:=$(PKG_NAME)
-  PKGARCH:=all
-endef
-
-define Package/$(PKG_NAME)-misc-hotplug/description
-This package includes a hotplug script for FreeSWITCH.
-endef
-
-define Package/$(PKG_NAME)-misc-hotplug/install
-	$(INSTALL_DIR) $(1)$(FS_STABLE_SYSCONF_DIR)/hotplug.d/iface
-	$(INSTALL_BIN) ./files/$(PRG_NAME).hotplug \
-		$(1)$(FS_STABLE_SYSCONF_DIR)/hotplug.d/iface/99-$(PRG_NAME)
-endef
-
-define Package/$(PKG_NAME)-misc-hotplug/postinst
-#!/bin/sh
-if [ -z "$${IPKG_INSTROOT}" ]; then
-  echo
-  echo "o-------------------------------------------------------------------o"
-  echo "| FreeSWITCH hotplug note                                           |"
-  echo "o-------------------------------------------------------------------o"
-  echo "| See /etc/config/freeswitch for hotplug hints.                     |"
-  echo "o-------------------------------------------------------------=^_^=-o"
-  echo
+  [ -f /etc/hotplug.d/iface/99-freeswitch ] && {
+    echo "o-------------------------------------------------------------------o"
+    echo "| WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING   |"
+    echo "o-------------------------------------------------------------------o"
+    echo "| Please remove freeswitch-stable-misc-hotplug. The hotplug script  |"
+    echo "| is now part of the main freeswitch-stable package. Please run:    |"
+    echo "|                                                                   |"
+    echo "| opkg remove freeswitch-stable-misc-hotplug                        |"
+    echo "o-------------------------------------------------------------=^_^=-o"
+    echo
+  }
 fi
 exit 0
 endef
@@ -824,12 +803,8 @@ endif
 FS_STABLE_ANCHOR:=dnl Get build information from APR
 FS_STABLE_APR_LIBS:=-L$(PKG_BUILD_DIR)/libs/apr -L$(PKG_BUILD_DIR)/libs/apr-util
 
-# With a release tarball we can just call Build/Prepare/Default. But with the
-# git checkout we need to call bootstrap and apply our patches afterward.
 define Build/Prepare
-	$(PKG_UNPACK)
-	cd $(PKG_BUILD_DIR) && $(AM_TOOL_PATHS) ./bootstrap.sh
-	$(Build/Patch)
+	$(call Build/Prepare/Default)
 
 	echo '#applications/mod_random' >> $(PKG_BUILD_DIR)/modules.conf
 	echo '#codecs/mod_yuv' >> $(PKG_BUILD_DIR)/modules.conf
@@ -945,7 +920,6 @@ endef
 
 $(eval $(call BuildPackage,$(PKG_LIBFTDM)))
 $(eval $(call BuildPackage,$(PKG_NAME)))
-$(eval $(call BuildPackage,$(PKG_NAME)-misc-hotplug))
 $(eval $(call BuildPackage,$(PKG_NAME)-misc-perl-esl))
 $(eval $(call BuildPackage,$(PKG_NAME)-misc-python-esl))
 $(eval $(call BuildPackage,$(PKG_NAME)-misc-timezones))
