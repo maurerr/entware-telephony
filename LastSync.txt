@@ -1,8 +1,8 @@
-commit f14a417ae332fca35f5b020ce964c105557a742f
-Merge: de2ac6f 8dc9a37
-Author: micmac1 <sebastian_ml@gmx.net>
-Date:   Sun Aug 26 20:13:55 2018 +0200
+commit d3666a4ca5f949cd97e0f1d3f1e4c720880957f5
+Merge: 4395598 74adbc8
+Author: Jiri Slachta <jiri.slachta@gmail.com>
+Date:   Sun Dec 2 21:54:54 2018 +0100
 
-    Merge pull request #368 from micmac1/fs-cpe
+    Merge pull request #394 from micmac1/kama-hot
     
-    freeswitch-stable: add PKG_CPE_ID
+    rtpproxy & kamailio: fix hotplug script file names
