@@ -29,7 +29,7 @@ define Package/sngrep
   SECTION:=utils
   CATEGORY:=Utilities
   SUBMENU:=Telephony
-  DEPENDS:=+libncursesw +libopenssl +libpcap +libpcre
+  DEPENDS:=+libncursesw +libopenssl +libpcap +libpcre +libpthread
   TITLE:=Ncurses SIP messages flow viewer
   URL:=https://github.com/irontec/sngrep
 endef

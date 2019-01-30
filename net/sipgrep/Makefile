@@ -32,7 +32,7 @@ define Package/sipgrep
   SECTION:=utils
   CATEGORY:=Utilities
   SUBMENU:=Telephony
-  DEPENDS:=+libpcap +libpcre
+  DEPENDS:=+libpcap +libpcre +libpthread
   TITLE:=Command line tool to sniff, capture, display SIP messages
   URL:=https://github.com/sipcapture/sipgrep
 endef
