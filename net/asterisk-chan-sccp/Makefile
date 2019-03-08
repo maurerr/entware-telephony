@@ -5,7 +5,6 @@
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
-# asterisk-11.x
 
 include $(TOPDIR)/rules.mk
 
@@ -43,13 +42,6 @@ define Package/chan-sccp/Default
   DEPENDS:=$(ICONV_DEPENDS) +libltdl
 endef
 
-define Package/asterisk11-chan-sccp
-$(call Package/chan-sccp/Default)
-  DEPENDS+=asterisk11
-  VARIANT:=asterisk11
-  CONFLICTS:=asterisk11-chan-skinny
-endef
-
 define Package/asterisk13-chan-sccp
 $(call Package/chan-sccp/Default)
   DEPENDS+=asterisk13
@@ -70,7 +62,6 @@ Extended features include shared lines, presence / BLF, customizable
 feature buttons and custom device state.
 endef
 
-Package/asterisk11-chan-sccp/description = $(Package/description/Default)
 Package/asterisk13-chan-sccp/description = $(Package/description/Default)
 Package/asterisk15-chan-sccp/description = $(Package/description/Default)
 
@@ -79,10 +70,6 @@ CONFIGURE_ARGS += \
 	--enable-advanced-functions \
 	--enable-conference \
 	--enable-video
-
-ifeq ($(BUILD_VARIANT),asterisk11)
-  CONFIGURE_ARGS += --with-asterisk=$(STAGING_DIR)/opt/include/asterisk-11
-endif
 
 ifeq ($(BUILD_VARIANT),asterisk13)
   CONFIGURE_ARGS += --with-asterisk=$(STAGING_DIR)/opt/include/asterisk-13
@@ -96,7 +83,6 @@ define Package/conffiles/Default
 /opt/etc/asterisk/sccp.conf
 endef
 
-Package/asterisk11-chan-sccp/conffiles = $(Package/conffiles/Default)
 Package/asterisk13-chan-sccp/conffiles = $(Package/conffiles/Default)
 Package/asterisk15-chan-sccp/conffiles = $(Package/conffiles/Default)
 
@@ -107,10 +93,8 @@ define Package/Install/Default
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/opt/lib/asterisk/modules/chan_sccp.so $(1)/opt/lib/asterisk/modules/
 endef
 
-Package/asterisk11-chan-sccp/install = $(Package/Install/Default)
 Package/asterisk13-chan-sccp/install = $(Package/Install/Default)
 Package/asterisk15-chan-sccp/install = $(Package/Install/Default)
 
-$(eval $(call BuildPackage,asterisk11-chan-sccp))
-#$(eval $(call BuildPackage,asterisk13-chan-sccp))
-#$(eval $(call BuildPackage,asterisk15-chan-sccp))
+$(eval $(call BuildPackage,asterisk13-chan-sccp))
+$(eval $(call BuildPackage,asterisk15-chan-sccp))
