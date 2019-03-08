@@ -4,7 +4,6 @@
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
-# asterisk-11.x
 
 include $(TOPDIR)/rules.mk
 
@@ -37,12 +36,6 @@ define Package/asterisk-g72x/Default
   DEPENDS:=+bcg729
 endef
 
-define Package/asterisk11-codec-g729
-$(call Package/asterisk-g72x/Default)
-  DEPENDS+=asterisk11
-  VARIANT:=asterisk11
-endef
-
 define Package/asterisk13-codec-g729
 $(call Package/asterisk-g72x/Default)
   DEPENDS+=asterisk13
@@ -59,19 +52,12 @@ define Package/description/Default
  Asterisk G.729 codec based on bcg729 implementation.
 endef
 
-Package/asterisk11-codec-g729/description = $(Package/description/Default)
 Package/asterisk13-codec-g729/description = $(Package/description/Default)
 Package/asterisk15-codec-g729/description = $(Package/description/Default)
 
 CONFIGURE_ARGS+= \
 	--with-bcg729 \
 	--enable-shared
-
-ifeq ($(BUILD_VARIANT),asterisk11)
-CONFIGURE_ARGS+= \
-	--with-asterisk-includes=$(STAGING_DIR)/opt/include/asterisk-11/include \
-	--with-asterisk100
-endif
 
 ifeq ($(BUILD_VARIANT),asterisk13)
 CONFIGURE_ARGS+= \
@@ -91,10 +77,8 @@ define Package/Install/Default
 		$(1)/opt/lib/asterisk/modules/
 endef
 
-Package/asterisk11-codec-g729/install = $(Package/Install/Default)
 Package/asterisk13-codec-g729/install = $(Package/Install/Default)
 Package/asterisk15-codec-g729/install = $(Package/Install/Default)
 
-$(eval $(call BuildPackage,asterisk11-codec-g729))
-#$(eval $(call BuildPackage,asterisk13-codec-g729))
-#$(eval $(call BuildPackage,asterisk15-codec-g729))
+$(eval $(call BuildPackage,asterisk13-codec-g729))
+$(eval $(call BuildPackage,asterisk15-codec-g729))
