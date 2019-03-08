@@ -1,0 +1,1036 @@
+--- a/addons/chan_ooh323.c
++++ b/addons/chan_ooh323.c
+@@ -82,7 +82,7 @@
+ /* Defaults */
+ #define DEFAULT_CONTEXT "default"
+ #define DEFAULT_H323ID "Asterisk PBX"
+-#define DEFAULT_LOGFILE "/var/log/asterisk/h323_log"
++#define DEFAULT_LOGFILE "/opt/var/log/asterisk/h323_log"
+ #define DEFAULT_H323ACCNT "ast_h323"
+ 
+ /* Flags */
+--- a/addons/res_config_mysql.c
++++ b/addons/res_config_mysql.c
+@@ -1277,7 +1277,7 @@ static int load_mysql_config(struct ast_
+ 
+ 	if (!(s = ast_variable_retrieve(config, category, "dbsock"))) {
+ 		if (ast_strlen_zero(conn->host)) {
+-			char *paths[3] = { "/tmp/mysql.sock", "/var/lib/mysql/mysql.sock", "/var/run/mysqld/mysqld.sock" };
++			char *paths[3] = { "/opt/tmp/mysql.sock", "/opt/var/lib/mysql/mysql.sock", "/opt/var/run/mysqld.sock" };
+ 			struct stat st;
+ 			int i;
+ 			for (i = 0; i < 3; i++) {
+--- a/apps/app_dahdiras.c
++++ b/apps/app_dahdiras.c
+@@ -77,7 +77,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ static const char app[] = "DAHDIRAS";
+ 
+ #define PPP_MAX_ARGS	32
+-#define PPP_EXEC	"/usr/sbin/pppd"
++#define PPP_EXEC	"/opt/sbin/pppd"
+ 
+ static pid_t spawn_ras(struct ast_channel *chan, char *args)
+ {
+--- a/apps/app_festival.c
++++ b/apps/app_festival.c
+@@ -346,7 +346,7 @@ static int festival_exec(struct ast_chan
+ 		usecache = ast_true(temp);
+ 	}
+ 	if (!(cachedir = ast_variable_retrieve(cfg, "general", "cachedir"))) {
+-		cachedir = "/tmp/";
++		cachedir = "/opt/tmp/";
+ 	}
+ 
+ 	data = ast_strdupa(vdata);
+--- a/apps/app_ices.c
++++ b/apps/app_ices.c
+@@ -69,8 +69,8 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ 
+  ***/
+ 
+-#define path_BIN "/usr/bin/"
+-#define path_LOCAL "/usr/local/bin/"
++#define path_BIN "/opt/bin/"
++#define path_LOCAL "/opt/bin/"
+ 
+ static char *app = "ICES";
+ 
+@@ -90,8 +90,8 @@ static int icesencode(char *filename, in
+ 	dup2(fd, STDIN_FILENO);
+ 	ast_close_fds_above_n(STDERR_FILENO);
+ 
+-	/* Most commonly installed in /usr/local/bin
+-	 * But many places has it in /usr/bin
++	/* Most commonly installed in /opt/bin
++	 * But many places has it in /opt/bin
+ 	 * As a last-ditch effort, try to use PATH
+ 	 */
+ 	execl(path_LOCAL "ices2", "ices", filename, SENTINEL);
+--- a/apps/app_minivm.c
++++ b/apps/app_minivm.c
+@@ -94,7 +94,7 @@
+ /*! \page Minivm_directories Asterisk Mini-Voicemail Directory structure
+  *
+  *	The directory structure for storing voicemail
+- *		- AST_SPOOL_DIR - usually /var/spool/asterisk (configurable in asterisk.conf)
++ *		- AST_SPOOL_DIR - usually /opt/var/spool/asterisk (configurable in asterisk.conf)
+  *		- MVM_SPOOL_DIR - should be configurable, usually AST_SPOOL_DIR/voicemail
+  *		- Domain	MVM_SPOOL_DIR/domain
+  *		- Username	MVM_SPOOL_DIR/domain/username
+@@ -104,7 +104,7 @@
+  *			- /temp		: Temporary message
+  *
+  *	For account anita@localdomain.xx the account directory would as a default be
+- *		\b /var/spool/asterisk/voicemail/localdomain.xx/anita
++ *		\b /opt/var/spool/asterisk/voicemail/localdomain.xx/anita
+  *
+  *	To avoid transcoding, these sound files should be converted into several formats
+  *	They are recorded in the format closest to the incoming streams
+@@ -533,7 +533,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ 
+ /*! \brief Default mail command to mail voicemail. Change it with the
+     mailcmd= command in voicemail.conf */
+-#define SENDMAIL "/usr/sbin/sendmail -t"
++#define SENDMAIL "/opt/sbin/sendmail -t"
+ 
+ #define SOUND_INTRO		"vm-intro"
+ #define B64_BASEMAXINLINE 	256	/*!< Buffer size for Base 64 attachment encoding */
+@@ -1244,7 +1244,7 @@ static int sendmail(struct minivm_templa
+ 	char bound[256];
+ 	char fname[PATH_MAX];
+ 	char dur[PATH_MAX];
+-	char tmp[80] = "/tmp/astmail-XXXXXX";
++	char tmp[80] = "/opt/tmp/astmail-XXXXXX";
+ 	char mail_cmd_buffer[PATH_MAX];
+ 	char sox_gain_tmpdir[PATH_MAX] = ""; /* Only used with volgain */
+ 	char *file_to_delete = NULL, *dir_to_delete = NULL;
+@@ -1283,7 +1283,7 @@ static int sendmail(struct minivm_templa
+ 	if (type == MVM_MESSAGE_EMAIL && (vmu->volgain < -.001 || vmu->volgain > .001) ) {
+ 		char sox_gain_cmd[PATH_MAX];
+ 
+-		ast_copy_string(sox_gain_tmpdir, "/tmp/minivm-gain-XXXXXX", sizeof(sox_gain_tmpdir));
++		ast_copy_string(sox_gain_tmpdir, "/opt/tmp/minivm-gain-XXXXXX", sizeof(sox_gain_tmpdir));
+ 		ast_debug(3, "sox_gain_tmpdir: %s\n", sox_gain_tmpdir);
+ 		if (!mkdtemp(sox_gain_tmpdir)) {
+ 			ast_log(LOG_WARNING, "Failed to create temporary directory for volgain: %d\n", errno);
+--- a/apps/app_mp3.c
++++ b/apps/app_mp3.c
+@@ -50,8 +50,8 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ #include "asterisk/app.h"
+ #include "asterisk/format_cache.h"
+ 
+-#define LOCAL_MPG_123 "/usr/local/bin/mpg123"
+-#define MPG_123 "/usr/bin/mpg123"
++#define LOCAL_MPG_123 "/opt/bin/mpg123"
++#define MPG_123 "/opt/bin/mpg123"
+ 
+ /*** DOCUMENTATION
+ 	<application name="MP3Player" language="en_US">
+@@ -68,7 +68,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ 			<para>Executes mpg123 to play the given location, which typically would be a mp3 filename
+ 			or m3u playlist filename or a URL. Please read http://en.wikipedia.org/wiki/M3U
+ 			to see how M3U playlist file format is like, Example usage would be
+-			exten => 1234,1,MP3Player(/var/lib/asterisk/playlist.m3u)
++			exten => 1234,1,MP3Player(/opt/var/lib/asterisk/playlist.m3u)
+ 			User can exit by pressing any key on the dialpad, or by hanging up.</para>
+ 			<para>This application does not automatically answer and should be preceeded by an
+ 			application such as Answer() or Progress().</para>
+@@ -101,9 +101,9 @@ static int mp3play(const char *filename,
+ 	if (!strncasecmp(filename, "http://", 7) && strstr(filename, ".m3u")) {
+ 	    char buffer_size_str[8];
+ 	    snprintf(buffer_size_str, 8, "%u", (int) 0.5*2*sampling_rate/1000); // 0.5 seconds for a live stream
+-		/* Most commonly installed in /usr/local/bin */
++		/* Most commonly installed in /opt/bin */
+ 	    execl(LOCAL_MPG_123, "mpg123", "-q", "-s", "-b", buffer_size_str, "-f", "8192", "--mono", "-r", sampling_rate_str, "-@", filename, (char *)NULL);
+-		/* But many places has it in /usr/bin */
++		/* But many places has it in /opt/bin */
+ 	    execl(MPG_123, "mpg123", "-q", "-s", "-b", buffer_size_str, "-f", "8192", "--mono", "-r", sampling_rate_str, "-@", filename, (char *)NULL);
+ 		/* As a last-ditch effort, try to use PATH */
+ 	    execlp("mpg123", "mpg123", "-q", "-s", "-b", buffer_size_str, "-f", "8192", "--mono", "-r", sampling_rate_str, "-@", filename, (char *)NULL);
+@@ -111,25 +111,25 @@ static int mp3play(const char *filename,
+ 	else if (!strncasecmp(filename, "http://", 7)) {
+ 	    char buffer_size_str[8];
+ 	    snprintf(buffer_size_str, 8, "%u", 6*2*sampling_rate/1000); // 6 seconds for a remote MP3 file
+-		/* Most commonly installed in /usr/local/bin */
++		/* Most commonly installed in /opt/bin */
+ 	    execl(LOCAL_MPG_123, "mpg123", "-q", "-s", "-b", buffer_size_str, "-f", "8192", "--mono", "-r", sampling_rate_str, filename, (char *)NULL);
+-		/* But many places has it in /usr/bin */
++		/* But many places has it in /opt/bin */
+ 	    execl(MPG_123, "mpg123", "-q", "-s", "-b", buffer_size_str, "-f", "8192", "--mono", "-r", sampling_rate_str, filename, (char *)NULL);
+ 		/* As a last-ditch effort, try to use PATH */
+ 	    execlp("mpg123", "mpg123", "-q", "-s", "-b", buffer_size_str, "-f", "8192", "--mono", "-r", sampling_rate_str, filename, (char *)NULL);
+ 	}
+ 	else if (strstr(filename, ".m3u")) {
+-		/* Most commonly installed in /usr/local/bin */
++		/* Most commonly installed in /opt/bin */
+ 	    execl(LOCAL_MPG_123, "mpg123", "-q", "-z", "-s", "-f", "8192", "--mono", "-r", sampling_rate_str, "-@", filename, (char *)NULL);
+-		/* But many places has it in /usr/bin */
++		/* But many places has it in /opt/bin */
+ 	    execl(MPG_123, "mpg123", "-q", "-z", "-s", "-f", "8192", "--mono", "-r", sampling_rate_str, "-@", filename, (char *)NULL);
+ 		/* As a last-ditch effort, try to use PATH */
+ 	    execlp("mpg123", "mpg123", "-q", "-z", "-s",  "-f", "8192", "--mono", "-r", sampling_rate_str, "-@", filename, (char *)NULL);
+ 	}
+ 	else {
+-		/* Most commonly installed in /usr/local/bin */
++		/* Most commonly installed in /opt/bin */
+ 	    execl(MPG_123, "mpg123", "-q", "-s", "-f", "8192", "--mono", "-r", sampling_rate_str, filename, (char *)NULL);
+-		/* But many places has it in /usr/bin */
++		/* But many places has it in /opt/bin */
+ 	    execl(LOCAL_MPG_123, "mpg123", "-q", "-s", "-f", "8192", "--mono", "-r", sampling_rate_str, filename, (char *)NULL);
+ 		/* As a last-ditch effort, try to use PATH */
+ 	    execlp("mpg123", "mpg123", "-q", "-s", "-f", "8192", "--mono", "-r", sampling_rate_str, filename, (char *)NULL);
+--- a/apps/app_nbscat.c
++++ b/apps/app_nbscat.c
+@@ -61,8 +61,8 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ 	</application>
+  ***/
+ 
+-#define LOCAL_NBSCAT "/usr/local/bin/nbscat8k"
+-#define NBSCAT "/usr/bin/nbscat8k"
++#define LOCAL_NBSCAT "/opt/bin/nbscat8k"
++#define NBSCAT "/opt/bin/nbscat8k"
+ 
+ #ifndef AF_LOCAL
+ #define AF_LOCAL AF_UNIX
+@@ -88,7 +88,7 @@ static int NBScatplay(int fd)
+ 
+ 	dup2(fd, STDOUT_FILENO);
+ 	ast_close_fds_above_n(STDERR_FILENO);
+-	/* Most commonly installed in /usr/local/bin */
++	/* Most commonly installed in /opt/bin */
+ 	execl(NBSCAT, "nbscat8k", "-d", (char *)NULL);
+ 	execl(LOCAL_NBSCAT, "nbscat8k", "-d", (char *)NULL);
+ 	fprintf(stderr, "Execute of nbscat8k failed\n");
+--- a/apps/app_sayunixtime.c
++++ b/apps/app_sayunixtime.c
+@@ -50,7 +50,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ 				<para>time, in seconds since Jan 1, 1970.  May be negative. Defaults to now.</para>
+ 			</parameter>
+ 			<parameter name="timezone" required="false" >
+-				<para>timezone, see <directory>/usr/share/zoneinfo</directory> for a list. Defaults to machine default.</para>
++				<para>timezone, see <directory>/opt/share/zoneinfo</directory> for a list. Defaults to machine default.</para>
+ 			</parameter>
+ 			<parameter name="format" required="false" >
+ 				<para>a format the time is to be said in.  See <filename>voicemail.conf</filename>.
+@@ -68,7 +68,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ 			</parameter>
+ 		</syntax>
+ 		<description>
+-			<para>Uses some of the sound files stored in <directory>/var/lib/asterisk/sounds</directory> to construct a phrase
++			<para>Uses some of the sound files stored in <directory>/opt/var/lib/asterisk/sounds</directory> to construct a phrase
+ 			saying the specified date and/or time in the specified format. </para>
+ 		</description>
+ 		<see-also>
+@@ -86,7 +86,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ 				<para>time, in seconds since Jan 1, 1970.  May be negative. Defaults to now.</para>
+ 			</parameter>
+ 			<parameter name="timezone">
+-				<para>timezone, see <filename>/usr/share/zoneinfo</filename> for a list. Defaults to machine default.</para>
++				<para>timezone, see <filename>/opt/share/zoneinfo</filename> for a list. Defaults to machine default.</para>
+ 			</parameter>
+ 			<parameter name="format">
+ 				<para>a format the time is to be said in.  See <filename>voicemail.conf</filename>.
+--- a/apps/app_sms.c
++++ b/apps/app_sms.c
+@@ -65,7 +65,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ 		</synopsis>
+ 		<syntax>
+ 			<parameter name="name" required="true">
+-				<para>The name of the queue used in <filename>/var/spool/asterisk/sms</filename></para>
++				<para>The name of the queue used in <filename>/opt/var/spool/asterisk/sms</filename></para>
+ 			</parameter>
+ 			<parameter name="options">
+ 				<optionlist>
+--- a/apps/app_test.c
++++ b/apps/app_test.c
+@@ -54,7 +54,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ 		<syntax />
+ 		<description>
+ 			<para>Perform test server function and write call report. Results stored in
+-			<filename>/var/log/asterisk/testreports/&lt;testid&gt;-server.txt</filename></para>
++			<filename>/opt/var/log/asterisk/testreports/&lt;testid&gt;-server.txt</filename></para>
+ 		</description>
+ 		<see-also>
+ 			<ref type="application">TestClient</ref>
+@@ -71,7 +71,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ 		</syntax>
+ 		<description>
+ 			<para>Executes test client with given <replaceable>testid</replaceable>. Results stored in
+-			<filename>/var/log/asterisk/testreports/&lt;testid&gt;-client.txt</filename></para>
++			<filename>/opt/var/log/asterisk/testreports/&lt;testid&gt;-client.txt</filename></para>
+ 		</description>
+ 		<see-also>
+ 			<ref type="application">TestServer</ref>
+--- a/apps/app_voicemail.c
++++ b/apps/app_voicemail.c
+@@ -578,7 +578,7 @@ static AST_LIST_HEAD_STATIC(vmstates, vm
+ 
+ /* Default mail command to mail voicemail. Change it with the
+  * mailcmd= command in voicemail.conf */
+-#define SENDMAIL "/usr/sbin/sendmail -t"
++#define SENDMAIL "/opt/sbin/sendmail -t"
+ 
+ #define INTRO "vm-intro"
+ 
+@@ -2644,7 +2644,7 @@ static int imap_store_file(const char *d
+ 	char mailbox[256];
+ 	char *stringp;
+ 	FILE *p = NULL;
+-	char tmp[80] = "/tmp/astmail-XXXXXX";
++	char tmp[80] = "/opt/tmp/astmail-XXXXXX";
+ 	long len;
+ 	void *buf;
+ 	int tempcopy = 0;
+@@ -5502,7 +5502,7 @@ static int sendmail(char *srcemail,
+ 		const char *msg_id)
+ {
+ 	FILE *p = NULL;
+-	char tmp[80] = "/tmp/astmail-XXXXXX";
++	char tmp[80] = "/opt/tmp/astmail-XXXXXX";
+ 	char tmp2[256];
+ 	char *stringp;
+ 
+@@ -5541,7 +5541,7 @@ static int sendpage(char *srcemail, char
+ 	char host[MAXHOSTNAMELEN] = "";
+ 	char who[256];
+ 	char dur[PATH_MAX];
+-	char tmp[80] = "/tmp/astmail-XXXXXX";
++	char tmp[80] = "/opt/tmp/astmail-XXXXXX";
+ 	char tmp2[PATH_MAX];
+ 	struct ast_tm tm;
+ 	FILE *p;
+@@ -14804,7 +14804,7 @@ AST_TEST_DEFINE(test_voicemail_load_conf
+ 	int res = AST_TEST_PASS;
+ 	struct ast_vm_user *vmu;
+ 	struct ast_config *cfg;
+-	char config_filename[32] = "/tmp/voicemail.conf.XXXXXX";
++	char config_filename[32] = "/opt/tmp/voicemail.conf.XXXXXX";
+ 	int fd;
+ 	FILE *file;
+ 	struct ast_flags config_flags = { CONFIG_FLAG_NOCACHE };
+--- a/cdr/cdr_radius.c
++++ b/cdr/cdr_radius.c
+@@ -88,9 +88,9 @@ static const char name[] = "radius";
+ static const char cdr_config[] = "cdr.conf";
+ 
+ #ifdef FREERADIUS_CLIENT
+-static char radiuscfg[PATH_MAX] = "/etc/radiusclient/radiusclient.conf";
++static char radiuscfg[PATH_MAX] = "/opt/etc/radiusclient/radiusclient.conf";
+ #else
+-static char radiuscfg[PATH_MAX] = "/etc/radiusclient-ng/radiusclient.conf";
++static char radiuscfg[PATH_MAX] = "/opt/etc/radiusclient-ng/radiusclient.conf";
+ #endif
+ 
+ static struct ast_flags global_flags = { RADIUS_FLAG_USEGMTIME | RADIUS_FLAG_LOGUNIQUEID | RADIUS_FLAG_LOGUSERFIELD };
+--- a/cel/cel_radius.c
++++ b/cel/cel_radius.c
+@@ -80,9 +80,9 @@ enum {
+ static char *cel_config = "cel.conf";
+ 
+ #ifdef FREERADIUS_CLIENT
+-static char radiuscfg[PATH_MAX] = "/etc/radiusclient/radiusclient.conf";
++static char radiuscfg[PATH_MAX] = "/opt/etc/radiusclient/radiusclient.conf";
+ #else
+-static char radiuscfg[PATH_MAX] = "/etc/radiusclient-ng/radiusclient.conf";
++static char radiuscfg[PATH_MAX] = "/opt/etc/radiusclient-ng/radiusclient.conf";
+ #endif
+ 
+ static struct ast_flags global_flags = { RADIUS_FLAG_USEGMTIME | RADIUS_FLAG_LOGUNIQUEID | RADIUS_FLAG_LOGUSERFIELD };
+--- a/channels/chan_alsa.c
++++ b/channels/chan_alsa.c
+@@ -1019,7 +1019,7 @@ static int load_module(void)
+ 
+ 	if (soundcard_init() < 0) {
+ 		ast_verb(2, "No sound card detected -- console channel will be unavailable\n");
+-		ast_verb(2, "Turn off ALSA support by adding 'noload=chan_alsa.so' in /etc/asterisk/modules.conf\n");
++		ast_verb(2, "Turn off ALSA support by adding 'noload=chan_alsa.so' in /opt/etc/asterisk/modules.conf\n");
+ 		unload_module();
+ 
+ 		return AST_MODULE_LOAD_DECLINE;
+--- a/channels/chan_dahdi.c
++++ b/channels/chan_dahdi.c
+@@ -11920,7 +11920,7 @@ static struct dahdi_mfcr2 *dahdi_r2_get_
+ 
+ static int dahdi_r2_set_context(struct dahdi_mfcr2 *r2_link, const struct dahdi_chan_conf *conf)
+ {
+-	char tmplogdir[] = "/tmp";
++	char tmplogdir[] = "/opt/tmp";
+ 	char logdir[OR2_MAX_PATH];
+ 	int threshold = 0;
+ 	int snres = 0;
+--- a/channels/chan_oss.c
++++ b/channels/chan_oss.c
+@@ -1420,7 +1420,7 @@ openit:
+ #ifdef TRYOPEN
+ 	if (setformat(o, O_RDWR) < 0) {	/* open device */
+ 		ast_verb(1, "Device %s not detected\n", ctg);
+-		ast_verb(1, "Turn off OSS support by adding " "'noload=chan_oss.so' in /etc/asterisk/modules.conf\n");
++		ast_verb(1, "Turn off OSS support by adding " "'noload=chan_oss.so' in /opt/etc/asterisk/modules.conf\n");
+ 		goto error;
+ 	}
+ 	if (o->duplex != CHAN_OSS_DUPLEX_FULL)
+--- a/channels/iax2/firmware.c
++++ b/channels/iax2/firmware.c
+@@ -77,7 +77,7 @@ static int try_firmware(char *s)
+ 	else
+ 		last = s;
+ 
+-	snprintf(s2, strlen(s) + 100, "/var/tmp/%s-%ld", last, ast_random());
++	snprintf(s2, strlen(s) + 100, "/opt/var/tmp/%s-%ld", last, ast_random());
+ 
+ 	if (stat(s, &stbuf) < 0) {
+ 		ast_log(LOG_WARNING, "Failed to stat '%s': %s\n", s, strerror(errno));
+--- a/channels/misdn/isdn_lib.c
++++ b/channels/misdn/isdn_lib.c
+@@ -2303,8 +2303,8 @@ static void misdn_save_data(int id, char
+ 	char n1[32],n2[32];
+ 	FILE *rx, *tx;
+ 
+-	sprintf(n1,"/tmp/misdn-rx-%d.raw",id);
+-	sprintf(n2,"/tmp/misdn-tx-%d.raw",id);
++	sprintf(n1,"/opt/tmp/misdn-rx-%d.raw",id);
++	sprintf(n2,"/opt/tmp/misdn-tx-%d.raw",id);
+ 
+ 	rx = fopen(n1,"a+");
+ 	tx = fopen(n2,"a+");
+--- a/channels/misdn_config.c
++++ b/channels/misdn_config.c
+@@ -399,10 +399,10 @@ static const struct misdn_cfg_spec gen_s
+ 		"\t3 - very Verbose, the above + lots of Driver specific infos\n"
+ 		"\t4 - even more Verbose than 3" },
+ #ifndef MISDN_1_2
+-	{ "misdn_init", MISDN_GEN_MISDN_INIT, MISDN_CTYPE_STR, "/etc/misdn-init.conf", NONE,
++	{ "misdn_init", MISDN_GEN_MISDN_INIT, MISDN_CTYPE_STR, "/opt/etc/misdn-init.conf", NONE,
+ 		"Set the path to the misdn-init.conf (for nt_ptp mode checking)." },
+ #endif
+-	{ "tracefile", MISDN_GEN_TRACEFILE, MISDN_CTYPE_STR, "/var/log/asterisk/misdn.log", NONE,
++	{ "tracefile", MISDN_GEN_TRACEFILE, MISDN_CTYPE_STR, "/opt/var/log/asterisk/misdn.log", NONE,
+ 		"Set the path to the massively growing trace file, if you want that." },
+ 	{ "bridging", MISDN_GEN_BRIDGING, MISDN_CTYPE_BOOL, "yes", NONE,
+ 		"Set this to yes if you want mISDN_dsp to bridge the calls in HW." },
+@@ -423,7 +423,7 @@ static const struct misdn_cfg_spec gen_s
+ 		"are running calls. with this option you can avoid dropping them" },
+ 	{ "ntdebugflags", MISDN_GEN_NTDEBUGFLAGS, MISDN_CTYPE_INT, "0", NONE,
+ 	  	"No description yet."},
+-	{ "ntdebugfile", MISDN_GEN_NTDEBUGFILE, MISDN_CTYPE_STR, "/var/log/misdn-nt.log", NONE,
++	{ "ntdebugfile", MISDN_GEN_NTDEBUGFILE, MISDN_CTYPE_STR, "/opt/var/log/misdn-nt.log", NONE,
+ 	  	"No description yet." }
+ };
+ 
+--- a/funcs/func_env.c
++++ b/funcs/func_env.c
+@@ -133,45 +133,45 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ 			<para/>
+ 			<para>Read mode (byte):</para>
+ 			<para>    ;reads the entire content of the file.</para>
+-			<para>    Set(foo=${FILE(/tmp/test.txt)})</para>
++			<para>    Set(foo=${FILE(/opt/tmp/test.txt)})</para>
+ 			<para>    ;reads from the 11th byte to the end of the file (i.e. skips the first 10).</para>
+-			<para>    Set(foo=${FILE(/tmp/test.txt,10)})</para>
++			<para>    Set(foo=${FILE(/opt/tmp/test.txt,10)})</para>
+ 			<para>    ;reads from the 11th to 20th byte in the file (i.e. skip the first 10, then read 10 bytes).</para>
+-			<para>    Set(foo=${FILE(/tmp/test.txt,10,10)})</para>
++			<para>    Set(foo=${FILE(/opt/tmp/test.txt,10,10)})</para>
+ 			<para/>
+ 			<para>Read mode (line):</para>
+ 			<para>    ; reads the 3rd line of the file.</para>
+-			<para>    Set(foo=${FILE(/tmp/test.txt,3,1,l)})</para>
++			<para>    Set(foo=${FILE(/opt/tmp/test.txt,3,1,l)})</para>
+ 			<para>    ; reads the 3rd and 4th lines of the file.</para>
+-			<para>    Set(foo=${FILE(/tmp/test.txt,3,2,l)})</para>
++			<para>    Set(foo=${FILE(/opt/tmp/test.txt,3,2,l)})</para>
+ 			<para>    ; reads from the third line to the end of the file.</para>
+-			<para>    Set(foo=${FILE(/tmp/test.txt,3,,l)})</para>
++			<para>    Set(foo=${FILE(/opt/tmp/test.txt,3,,l)})</para>
+ 			<para>    ; reads the last three lines of the file.</para>
+-			<para>    Set(foo=${FILE(/tmp/test.txt,-3,,l)})</para>
++			<para>    Set(foo=${FILE(/opt/tmp/test.txt,-3,,l)})</para>
+ 			<para>    ; reads the 3rd line of a DOS-formatted file.</para>
+-			<para>    Set(foo=${FILE(/tmp/test.txt,3,1,l,d)})</para>
++			<para>    Set(foo=${FILE(/opt/tmp/test.txt,3,1,l,d)})</para>
+ 			<para/>
+ 			<para>Write mode (byte):</para>
+ 			<para>    ; truncate the file and write "bar"</para>
+-			<para>    Set(FILE(/tmp/test.txt)=bar)</para>
++			<para>    Set(FILE(/opt/tmp/test.txt)=bar)</para>
+ 			<para>    ; Append "bar"</para>
+-			<para>    Set(FILE(/tmp/test.txt,,,a)=bar)</para>
++			<para>    Set(FILE(/opt/tmp/test.txt,,,a)=bar)</para>
+ 			<para>    ; Replace the first byte with "bar" (replaces 1 character with 3)</para>
+-			<para>    Set(FILE(/tmp/test.txt,0,1)=bar)</para>
++			<para>    Set(FILE(/opt/tmp/test.txt,0,1)=bar)</para>
+ 			<para>    ; Replace 10 bytes beginning at the 21st byte of the file with "bar"</para>
+-			<para>    Set(FILE(/tmp/test.txt,20,10)=bar)</para>
++			<para>    Set(FILE(/opt/tmp/test.txt,20,10)=bar)</para>
+ 			<para>    ; Replace all bytes from the 21st with "bar"</para>
+-			<para>    Set(FILE(/tmp/test.txt,20)=bar)</para>
++			<para>    Set(FILE(/opt/tmp/test.txt,20)=bar)</para>
+ 			<para>    ; Insert "bar" after the 4th character</para>
+-			<para>    Set(FILE(/tmp/test.txt,4,0)=bar)</para>
++			<para>    Set(FILE(/opt/tmp/test.txt,4,0)=bar)</para>
+ 			<para/>
+ 			<para>Write mode (line):</para>
+ 			<para>    ; Replace the first line of the file with "bar"</para>
+-			<para>    Set(FILE(/tmp/foo.txt,0,1,l)=bar)</para>
++			<para>    Set(FILE(/opt/tmp/foo.txt,0,1,l)=bar)</para>
+ 			<para>    ; Replace the last line of the file with "bar"</para>
+-			<para>    Set(FILE(/tmp/foo.txt,-1,,l)=bar)</para>
++			<para>    Set(FILE(/opt/tmp/foo.txt,-1,,l)=bar)</para>
+ 			<para>    ; Append "bar" to the file with a newline</para>
+-			<para>    Set(FILE(/tmp/foo.txt,,,al)=bar)</para>
++			<para>    Set(FILE(/opt/tmp/foo.txt,,,al)=bar)</para>
+ 			<note>
+ 				<para>If <literal>live_dangerously</literal> in <literal>asterisk.conf</literal>
+ 				is set to <literal>no</literal>, this function can only be executed from the
+--- a/main/abstract_jb.c
++++ b/main/abstract_jb.c
+@@ -446,7 +446,7 @@ static int create_jb(struct ast_channel
+ 	/* Create a frame log file */
+ 	if (ast_test_flag(jbconf, AST_JB_LOG)) {
+ 		struct ast_channel *bridged = ast_channel_bridge_peer(chan);
+-		char safe_logfile[30] = "/tmp/logfile-XXXXXX";
++		char safe_logfile[30] = "/opt/tmp/logfile-XXXXXX";
+ 		int safe_fd;
+ 
+ 		snprintf(name2, sizeof(name2), "%s", ast_channel_name(chan));
+@@ -463,7 +463,7 @@ static int create_jb(struct ast_channel
+ 		}
+ 
+ 		snprintf(logfile_pathname, sizeof(logfile_pathname),
+-			"/tmp/ast_%s_jb_%s--%s.log", jbimpl->name, name1, name2);
++			"/opt/tmp/ast_%s_jb_%s--%s.log", jbimpl->name, name1, name2);
+ 		unlink(logfile_pathname);
+ 		safe_fd = mkstemp(safe_logfile);
+ 		if (safe_fd < 0 || link(safe_logfile, logfile_pathname) || unlink(safe_logfile) || !(jb->logfile = fdopen(safe_fd, "w+b"))) {
+--- a/main/asterisk.c
++++ b/main/asterisk.c
+@@ -1315,7 +1315,7 @@ int ast_safe_system(const char *s)
+ 	pid_t pid = safe_exec_prep(0);
+ 
+ 	if (pid == 0) {
+-		execl("/bin/sh", "/bin/sh", "-c", s, (char *) NULL);
++		execl("/opt/bin/sh", "/opt/bin/sh", "-c", s, (char *) NULL);
+ 		_exit(1);
+ 		/* noreturn from _exit */
+ 	}
+@@ -2389,7 +2389,7 @@ static void consolehandler(const char *s
+ 		if (s[1])
+ 			ast_safe_system(s+1);
+ 		else
+-			ast_safe_system(getenv("SHELL") ? getenv("SHELL") : "/bin/sh");
++			ast_safe_system(getenv("SHELL") ? getenv("SHELL") : "/opt/bin/sh");
+ 	} else
+ 		ast_cli_command(STDOUT_FILENO, s);
+ }
+@@ -2411,7 +2411,7 @@ static int remoteconsolehandler(const ch
+ 		if (s[1])
+ 			ast_safe_system(s+1);
+ 		else
+-			ast_safe_system(getenv("SHELL") ? getenv("SHELL") : "/bin/sh");
++			ast_safe_system(getenv("SHELL") ? getenv("SHELL") : "/opt/bin/sh");
+ 		ret = 1;
+ 	} else if ((strncasecmp(s, "quit", 4) == 0 || strncasecmp(s, "exit", 4) == 0) &&
+ 	    (s[4] == '\0' || isspace(s[4]))) {
+@@ -3470,7 +3470,7 @@ static int show_cli_help(void)
+ 	printf("   -r              Connect to Asterisk on this machine\n");
+ 	printf("   -R              Same as -r, except attempt to reconnect if disconnected\n");
+ 	printf("   -s <socket>     Connect to Asterisk via socket <socket> (only valid with -r)\n");
+-	printf("   -t              Record soundfiles in /var/tmp and move them where they\n");
++	printf("   -t              Record soundfiles in /opt/var/tmp and move them where they\n");
+ 	printf("                   belong after they are done\n");
+ 	printf("   -T              Display the time in [Mmm dd hh:mm:ss] format for each line\n");
+ 	printf("                   of output to the CLI\n");
+--- a/main/bucket.c
++++ b/main/bucket.c
+@@ -809,7 +809,7 @@ int ast_bucket_file_temporary_create(str
+ {
+ 	int fd;
+ 
+-	ast_copy_string(file->path, "/tmp/bucket-XXXXXX", sizeof(file->path));
++	ast_copy_string(file->path, "/opt/tmp/bucket-XXXXXX", sizeof(file->path));
+ 
+ 	fd = mkstemp(file->path);
+ 	if (fd < 0) {
+--- a/main/config.c
++++ b/main/config.c
+@@ -1913,7 +1913,7 @@ static int process_text_line(struct ast_
+ 
+ 			if (!ast_test_flag(&flags, CONFIG_FLAG_NOCACHE))
+ 				config_cache_attribute(configfile, ATTRIBUTE_EXEC, NULL, who_asked);
+-			snprintf(exec_file, sizeof(exec_file), "/var/tmp/exec.%d%d.%ld", (int)now.tv_sec, (int)now.tv_usec, (long)pthread_self());
++			snprintf(exec_file, sizeof(exec_file), "/opt/var/tmp/exec.%d%d.%ld", (int)now.tv_sec, (int)now.tv_usec, (long)pthread_self());
+ 			if (snprintf(cmd, sizeof(cmd), "%s > %s 2>&1", cur, exec_file) >= sizeof(cmd)) {
+ 				ast_log(LOG_ERROR, "Failed to construct command string to execute %s.\n", cur);
+ 
+--- a/main/file.c
++++ b/main/file.c
+@@ -403,7 +403,7 @@ static void filestream_destructor(void *
+ 	if (f->realfilename && f->filename) {
+ 		pid = ast_safe_fork(0);
+ 		if (!pid) {
+-			execl("/bin/mv", "mv", "-f", f->filename, f->realfilename, SENTINEL);
++			execl("/opt/bin/mv", "mv", "-f", f->filename, f->realfilename, SENTINEL);
+ 			_exit(1);
+ 		}
+ 		else if (pid > 0) {
+--- a/main/manager.c
++++ b/main/manager.c
+@@ -5124,7 +5124,7 @@ static int action_command(struct mansess
+ 	const char *cmd = astman_get_header(m, "Command");
+ 	const char *id = astman_get_header(m, "ActionID");
+ 	char *buf = NULL, *final_buf = NULL;
+-	char template[] = "/tmp/ast-ami-XXXXXX";	/* template for temporary file */
++	char template[] = "/opt/tmp/ast-ami-XXXXXX";	/* template for temporary file */
+ 	int fd;
+ 	off_t l;
+ 
+@@ -7735,7 +7735,7 @@ static int generic_http_callback(struct
+ 	uint32_t ident;
+ 	int blastaway = 0;
+ 	struct ast_variable *params = get_params;
+-	char template[] = "/tmp/ast-http-XXXXXX";	/* template for temporary file */
++	char template[] = "/opt/tmp/ast-http-XXXXXX";	/* template for temporary file */
+ 	struct ast_str *http_header = NULL, *out = NULL;
+ 	struct message m = { 0 };
+ 
+@@ -7942,7 +7942,7 @@ static int auth_http_callback(struct ast
+ 	struct mansession_session *session = NULL;
+ 	struct mansession s = { .session = NULL, .tcptls_session = ser };
+ 	struct ast_variable *v, *params = get_params;
+-	char template[] = "/tmp/ast-http-XXXXXX";	/* template for temporary file */
++	char template[] = "/opt/tmp/ast-http-XXXXXX";	/* template for temporary file */
+ 	struct ast_str *http_header = NULL, *out = NULL;
+ 	size_t result_size;
+ 	struct message m = { 0 };
+--- a/main/pbx_variables.c
++++ b/main/pbx_variables.c
+@@ -59,7 +59,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ 			the variable will be inherited into channels created from the current channel.
+ 			If the variable name is prefixed with <literal>__</literal>, the variable will be
+ 			inherited into channels created from the current channel and all children channels.</para>
+-			<note><para>If (and only if), in <filename>/etc/asterisk/asterisk.conf</filename>, you have
++			<note><para>If (and only if), in <filename>/opt/etc/asterisk/asterisk.conf</filename>, you have
+ 			a <literal>[compat]</literal> category, and you have <literal>app_set = 1.4</literal> under that, then
+ 			the behavior of this app changes, and strips surrounding quotes from the right hand side as
+ 			it did previously in 1.4.
+--- a/main/stdtime/localtime.c
++++ b/main/stdtime/localtime.c
+@@ -339,7 +339,7 @@ static void common_startup(void) {
+ 		if (sp->name[0] == '/') {
+ 			snprintf(name, sizeof(name), "%s", sp->name);
+ 		} else if (!strcmp(sp->name, TZDEFAULT)) {
+-			snprintf(name, sizeof(name), "/etc/%s", sp->name);
++			snprintf(name, sizeof(name), "/opt/etc/%s", sp->name);
+ 		} else {
+ 			snprintf(name, sizeof(name), "%s/%s", TZDIR, sp->name);
+ 		}
+@@ -1611,7 +1611,7 @@ static const struct state *ast_tzset(con
+ 			zone = "GMT";
+ 		}
+ #else
+-		zone = "/etc/localtime";
++		zone = "/opt/etc/localtime";
+ #endif
+ 	}
+ 
+--- a/main/stdtime/private.h
++++ b/main/stdtime/private.h
+@@ -73,7 +73,7 @@ static char	__attribute__((unused)) priv
+ #endif /* !defined HAVE_UTMPX_H */
+ 
+ #ifndef LOCALE_HOME
+-#define LOCALE_HOME		"/usr/lib/locale"
++#define LOCALE_HOME		"/opt/usr/lib/locale"
+ #endif /* !defined LOCALE_HOME */
+ 
+ #if HAVE_INCOMPATIBLE_CTIME_R
+--- a/main/stdtime/tzfile.h
++++ b/main/stdtime/tzfile.h
+@@ -33,7 +33,7 @@ static char	__attribute__((unused)) tzfi
+ #ifdef SOLARIS
+ #define TZDIR	"/usr/share/lib/zoneinfo"
+ #else
+-#define TZDIR	"/usr/share/zoneinfo"
++#define TZDIR	"/opt/share/zoneinfo"
+ #endif /* defined SOLARIS */
+ #endif /* !defined TZDIR */
+ 
+--- a/main/term.c
++++ b/main/term.c
+@@ -49,9 +49,7 @@ static char enddata[80] = "";
+ static char quitdata[80] = "";
+ 
+ static const char * const termpath[] = {
+-	"/usr/share/terminfo",
+-	"/usr/local/share/misc/terminfo",
+-	"/usr/lib/terminfo",
++	"/opt/share/terminfo",
+ 	NULL
+ 	};
+ 
+--- a/pbx/pbx_config.c
++++ b/pbx/pbx_config.c
+@@ -805,7 +805,7 @@ static char *handle_cli_dialplan_save(st
+ 			"Usage: dialplan save [/path/to/extension/file]\n"
+ 			"       Save dialplan created by pbx_config module.\n"
+ 			"\n"
+-			"Example: dialplan save                 (/etc/asterisk/extensions.conf)\n"
++			"Example: dialplan save                 (/opt/etc/asterisk/extensions.conf)\n"
+ 			"         dialplan save /home/markster  (/home/markster/extensions.conf)\n";
+ 		return NULL;
+ 	case CLI_GENERATE:
+--- a/res/ael/pval.c
++++ b/res/ael/pval.c
+@@ -4627,7 +4627,7 @@ int ast_compile_ael2(struct ast_context
+ 			int found = 0;
+ 			while (!found) {
+ 				/* Pick a new context name that is not used. */
+-				char h_context_template[] = "/tmp/ael-builtin-h-bubble-XXXXXX";
++				char h_context_template[] = "/opt/tmp/ael-builtin-h-bubble-XXXXXX";
+ 				int fd = mkstemp(h_context_template);
+ 				unlink(h_context_template);
+ 				close(fd);
+--- a/res/res_agi.c
++++ b/res/res_agi.c
+@@ -665,7 +665,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ 				'digits/at' IMp</literal>).</para>
+ 			</parameter>
+ 			<parameter name="timezone">
+-				<para>Acceptable values can be found in <filename>/usr/share/zoneinfo</filename>
++				<para>Acceptable values can be found in <filename>/opt/share/zoneinfo</filename>
+ 				Defaults to machine default.</para>
+ 			</parameter>
+ 		</syntax>
+@@ -1182,9 +1182,9 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ 			variable to <literal>yes</literal>.</para>
+ 			</note>
+ 			<example title="AGI invocation examples">
+-				; Start the AGI script /tmp/my-cool-script.sh, passing it the contents
++				; Start the AGI script /opt/tmp/my-cool-script.sh, passing it the contents
+ 				; of the channel variable FOO
+-				same => n,AGI(/tmp/my-cool-script.sh,${FOO})
++				same => n,AGI(/opt/tmp/my-cool-script.sh,${FOO})
+ 
+ 				; Start the AGI script my-cool-script.sh located in the astagidir
+ 				; directory, specified in asterisk.conf
+--- a/res/res_config_pgsql.c
++++ b/res/res_config_pgsql.c
+@@ -1542,8 +1542,8 @@ static int parse_config(int is_reload)
+ 		/* No socket needed */
+ 	} else if (!(s = ast_variable_retrieve(config, "general", "dbsock"))) {
+ 		ast_log(LOG_WARNING,
+-				"PostgreSQL RealTime: No database socket found, using '/tmp/.s.PGSQL.%d' as default.\n", dbport);
+-		strcpy(dbsock, "/tmp");
++				"PostgreSQL RealTime: No database socket found, using '/opt/tmp/.s.PGSQL.%d' as default.\n", dbport);
++		strcpy(dbsock, "/opt/tmp");
+ 	} else {
+ 		ast_copy_string(dbsock, s, sizeof(dbsock));
+ 	}
+--- a/res/res_monitor.c
++++ b/res/res_monitor.c
+@@ -111,7 +111,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ 			<para>Used to start monitoring a channel. The channel's input and output
+ 			voice packets are logged to files until the channel hangs up or
+ 			monitoring is stopped by the StopMonitor application.</para>
+-			<para>By default, files are stored to <filename>/var/spool/asterisk/monitor/</filename>.
++			<para>By default, files are stored to <filename>/opt/var/spool/asterisk/monitor/</filename>.
+ 			Returns <literal>-1</literal> if monitor files can't be opened or if the channel is
+ 			already monitored, otherwise <literal>0</literal>.</para>
+ 		</description>
+--- a/res/res_musiconhold.c
++++ b/res/res_musiconhold.c
+@@ -208,8 +208,8 @@ struct mohdata {
+ 
+ static struct ao2_container *mohclasses;
+ 
+-#define LOCAL_MPG_123 "/usr/local/bin/mpg123"
+-#define MPG_123 "/usr/bin/mpg123"
++#define LOCAL_MPG_123 "/opt/bin/mpg123"
++#define MPG_123 "/opt/bin/mpg123"
+ #define MAX_MP3S 256
+ 
+ static int reload(void);
+@@ -686,9 +686,9 @@ static int spawn_mp3(struct mohclass *cl
+ 		if (ast_test_flag(class, MOH_CUSTOM)) {
+ 			execv(argv[0], argv);
+ 		} else {
+-			/* Default install is /usr/local/bin */
++			/* Default install is /opt/usr/local/bin */
+ 			execv(LOCAL_MPG_123, argv);
+-			/* Many places have it in /usr/bin */
++			/* Many places have it in /opt/bin */
+ 			execv(MPG_123, argv);
+ 			/* Check PATH as a last-ditch effort */
+ 			execvp("mpg123", argv);
+--- a/res/res_odbc.c
++++ b/res/res_odbc.c
+@@ -909,7 +909,7 @@ static odbc_status odbc_obj_connect(stru
+ 	unsigned char msg[200], state[10];
+ #ifdef NEEDTRACE
+ 	SQLINTEGER enable = 1;
+-	char *tracefile = "/tmp/odbc.trace";
++	char *tracefile = "/opt/tmp/odbc.trace";
+ #endif
+ 	SQLHDBC con;
+ 	long int negative_cache_expiration;
+--- a/tests/test_file.c
++++ b/tests/test_file.c
+@@ -137,7 +137,7 @@ static int handle_find_file(const char *
+ 
+ AST_TEST_DEFINE(read_dirs_test)
+ {
+-	char tmp_dir[] = "/tmp/tmpdir.XXXXXX";
++	char tmp_dir[] = "/opt/tmp/tmpdir.XXXXXX";
+ 	struct ast_str *tmp_sub_dir;
+ 	struct _filenames filenames;
+ 	enum ast_test_result_state res;
+--- a/tests/test_func_file.c
++++ b/tests/test_func_file.c
+@@ -251,7 +251,7 @@ AST_TEST_DEFINE(test_func_file)
+ {
+ 	int res = AST_TEST_PASS;
+ 	int i;
+-	char dir[] = "/tmp/test_func_file.XXXXXX";
++	char dir[] = "/opt/tmp/test_func_file.XXXXXX";
+ 	char file[80], expression[256];
+ 	struct ast_str *buf, *disp[2] = { NULL, NULL };
+ 	char fbuf[8192];
+--- a/tests/test_json.c
++++ b/tests/test_json.c
+@@ -1236,7 +1236,7 @@ AST_TEST_DEFINE(json_test_dump_load_file
+ {
+ 	RAII_VAR(struct ast_json *, uut, NULL, ast_json_unref);
+ 	RAII_VAR(struct ast_json *, expected, NULL, ast_json_unref);
+-	char filename[] = "/tmp/ast_json.XXXXXX";
++	char filename[] = "/opt/tmp/ast_json.XXXXXX";
+ 	RAII_VAR(char *, rm_on_exit, filename, unlink);
+ 	RAII_VAR(FILE *, file, NULL, safe_fclose);
+ 	int uut_res;
+@@ -1271,7 +1271,7 @@ AST_TEST_DEFINE(json_test_dump_load_new_
+ {
+ 	RAII_VAR(struct ast_json *, uut, NULL, ast_json_unref);
+ 	RAII_VAR(struct ast_json *, expected, NULL, ast_json_unref);
+-	char filename[] = "/tmp/ast_json.XXXXXX";
++	char filename[] = "/opt/tmp/ast_json.XXXXXX";
+ 	RAII_VAR(char *, rm_on_exit, filename, unlink);
+ 	RAII_VAR(FILE *, file, NULL, safe_fclose);
+ 	int uut_res;
+@@ -1302,7 +1302,7 @@ AST_TEST_DEFINE(json_test_dump_load_new_
+ AST_TEST_DEFINE(json_test_dump_load_null)
+ {
+ 	RAII_VAR(struct ast_json *, uut, NULL, ast_json_unref);
+-	char filename[] = "/tmp/ast_json.XXXXXX";
++	char filename[] = "/opt/tmp/ast_json.XXXXXX";
+ 	RAII_VAR(char *, rm_on_exit, filename, unlink);
+ 	RAII_VAR(FILE *, file, NULL, safe_fclose);
+ 
+--- a/tests/test_locale.c
++++ b/tests/test_locale.c
+@@ -84,7 +84,7 @@ static char *handle_cli_test_locales(str
+ #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined( __NetBSD__ ) || defined(__APPLE__)
+ 		"/usr/share/locale"
+ #else /* Linux */
+-		"/usr/lib/locale"
++		"/opt/usr/lib/locale"
+ #endif
+ 		))) {
+ 		ast_cli(a->fd, "No locales seem to exist on this platform.\n");
+--- a/tests/test_logger.c
++++ b/tests/test_logger.c
+@@ -197,7 +197,7 @@ static char *handle_cli_queue_test(struc
+ 	unsigned int x;
+ 	struct timeval start, end;
+ 	int elapsed;
+-	char tmppath[] = "/tmp/asterisk_logger_queue.XXXXXX";
++	char tmppath[] = "/opt/tmp/asterisk_logger_queue.XXXXXX";
+ 	int fd;
+ 
+ 	switch (cmd) {
+--- a/tests/test_time.c
++++ b/tests/test_time.c
+@@ -43,7 +43,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ #ifdef SOLARIS
+ #define TZDIR	"/usr/share/lib/zoneinfo"
+ #else
+-#define TZDIR	"/usr/share/zoneinfo"
++#define TZDIR	"/opt/share/zoneinfo"
+ #endif /* defined SOLARIS */
+ #endif /* !defined TZDIR */
+ 
+@@ -53,7 +53,7 @@ AST_TEST_DEFINE(test_timezone_watch)
+ 	int type, i, res = AST_TEST_PASS;
+ 	struct timeval tv = ast_tvnow();
+ 	struct ast_tm atm[ARRAY_LEN(zones)];
+-	char tmpdir[] = "/tmp/timezone.XXXXXX";
++	char tmpdir[] = "/opt/tmp/timezone.XXXXXX";
+ 	char tzfile[50], syscmd[256];
+ 
+ 	switch (cmd) {
+--- a/tests/test_utils.c
++++ b/tests/test_utils.c
+@@ -400,7 +400,7 @@ AST_TEST_DEFINE(agi_loaded_test)
+ 
+ AST_TEST_DEFINE(safe_mkdir_test)
+ {
+-	char base_path[] = "/tmp/safe_mkdir.XXXXXX";
++	char base_path[] = "/opt/tmp/safe_mkdir.XXXXXX";
+ 	char path[80] = {};
+ 	int res;
+ 	struct stat actual;
+@@ -467,7 +467,7 @@ AST_TEST_DEFINE(safe_mkdir_test)
+ 	res = ast_safe_mkdir(base_path, path, 0777);
+ 	ast_test_validate(test, 0 != res);
+ 	ast_test_validate(test, EPERM == errno);
+-	strncpy(path, "/tmp/nor_should_this", sizeof(path));
++	strncpy(path, "/opt/tmp/nor_should_this", sizeof(path));
+ 	res = stat(path, &actual);
+ 	ast_test_validate(test, 0 != res);
+ 	ast_test_validate(test, ENOENT == errno);
+@@ -477,7 +477,7 @@ AST_TEST_DEFINE(safe_mkdir_test)
+ 	res = ast_safe_mkdir(base_path, path, 0777);
+ 	ast_test_validate(test, 0 != res);
+ 	ast_test_validate(test, EPERM == errno);
+-	strncpy(path, "/tmp/work", sizeof(path));
++	strncpy(path, "/opt/tmp/work", sizeof(path));
+ 	res = stat(path, &actual);
+ 	ast_test_validate(test, 0 != res);
+ 	ast_test_validate(test, ENOENT == errno);
+--- a/utils/ael_main.c
++++ b/utils/ael_main.c
+@@ -529,10 +529,10 @@ int main(int argc, char **argv)
+ 		localized_use_local_dir();
+ 	}
+ 	else {
+-		strcpy(config_dir, "/etc/asterisk");
++		strcpy(config_dir, "/opt/etc/asterisk");
+ 		localized_use_conf_dir();
+ 	}
+-	strcpy(var_dir, "/var/lib/asterisk");
++	strcpy(var_dir, "/opt/var/lib/asterisk");
+ 
+ 	if( dump_extensions ) {
+ 		dumpfile = fopen("extensions.conf.aeldump","w");
+--- a/utils/astdb2bdb.c
++++ b/utils/astdb2bdb.c
+@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
+ 		fprintf(stderr, "%s takes the path of SQLite3 astdb as its only argument\n", basename(argv[0]));
+ 		fprintf(stderr, "and will produce a file 'astdb' in the current directory\n"
+ 				"Make a backup of any existing Berkeley DB astdb you have and copy\n"
+-				"the new astdb to its location: often /var/lib/asterisk/astdb\n");
++				"the new astdb to its location: often /opt/var/lib/asterisk/astdb\n");
+ 		exit(-1);
+ 	}
+ 
+@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
+ 	}
+ 
+ 	printf("Created ./astdb. Back up any existing astdb and copy the created\n");
+-	printf("astdb file to the original's location. Often /var/lib/asterisk/astdb.\n");
++	printf("astdb file to the original's location. Often /opt/var/lib/asterisk/astdb.\n");
+ 
+ 	sqlite3_close(sql3db);
+ 	return 0;
+--- a/utils/conf2ael.c
++++ b/utils/conf2ael.c
+@@ -56,7 +56,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revisi
+ #include "asterisk/pval.h"
+ #include "asterisk/extconf.h"
+ 
+-const char *ast_config_AST_CONFIG_DIR = "/etc/asterisk";	/* placeholder */
++const char *ast_config_AST_CONFIG_DIR = "/opt/etc/asterisk";	/* placeholder */
+ 
+ void get_start_stop(unsigned int *word, int bitsperword, int totalbits, int *start, int *end);
+ int all_bits_set(unsigned int *word, int bitsperword, int totalbits);
+--- a/utils/db1-ast/btree/bt_open.c
++++ b/utils/db1-ast/btree/bt_open.c
+@@ -397,14 +397,14 @@ tmp()
+ 
+ 	envtmp = getenv("TMPDIR");
+ 	if (!envtmp)
+-	  envtmp = "/tmp";
++	  envtmp = "/opt/tmp";
+ 	n = strlen (envtmp) + sizeof fmt;
+ #ifdef	__GNUC__
+ 	path = __builtin_alloca(n);
+ #else
+ 	path = malloc(n);
+ #endif
+-	(void)snprintf(path, n, fmt, envtmp ? envtmp : "/tmp");
++	(void)snprintf(path, n, fmt, envtmp ? envtmp : "/opt/tmp");
+ 
+ 	(void)sigfillset(&set);
+ 	(void)sigprocmask(SIG_BLOCK, &set, &oset);
+--- a/utils/extconf.c
++++ b/utils/extconf.c
+@@ -1105,7 +1105,7 @@ int ast_safe_system(const char *s)
+ 		for (x = STDERR_FILENO + 1; x < 4096; x++)
+ 			close(x);
+ #endif
+-		execl("/bin/sh", "/bin/sh", "-c", s, (char *) NULL);
++		execl("/opt/bin/sh", "/opt/bin/sh", "-c", s, (char *) NULL);
+ 		_exit(1);
+ 	} else if (pid > 0) {
+ 		for(;;) {
+@@ -1177,7 +1177,7 @@ struct ast_config_include {
+ 	char *include_location_file;     /*!< file name in which the include occurs */
+ 	int  include_location_lineno;    /*!< lineno where include occurred */
+ 	int  exec;                       /*!< set to non-zero if itsa #exec statement */
+-	char *exec_file;                 /*!< if it's an exec, you'll have both the /var/tmp to read, and the original script */
++	char *exec_file;                 /*!< if it's an exec, you'll have both the /opt/var/tmp to read, and the original script */
+ 	char *included_file;             /*!< file name included */
+ 	int inclusion_count;             /*!< if the file is included more than once, a running count thereof -- but, worry not,
+ 									   we explode the instances and will include those-- so all entries will be unique */
+@@ -3286,7 +3286,7 @@ static int process_text_line(struct ast_
+ 				if (do_exec) {
+ 					char cmd[1024];
+ 
+-					snprintf(exec_file, sizeof(exec_file), "/var/tmp/exec.%d.%ld", (int)time(NULL), (long)pthread_self());
++					snprintf(exec_file, sizeof(exec_file), "/opt/var/tmp/exec.%d.%ld", (int)time(NULL), (long)pthread_self());
+ 					if (snprintf(cmd, sizeof(cmd), "%s > %s 2>&1", cur, exec_file) >= sizeof(cmd)) {
+ 						ast_log(LOG_ERROR, "Failed to construct command string to execute %s.\n", cur);
+ 
+--- a/utils/muted.c
++++ b/utils/muted.c
+@@ -72,7 +72,7 @@
+ 
+ #define ast_strlen_zero(a)	(!(*(a)))
+ 
+-static char *config = "/etc/asterisk/muted.conf";
++static char *config = "/opt/etc/asterisk/muted.conf";
+ 
+ static char host[256] = "";
+ static char user[256] = "";
+--- a/utils/smsq.c
++++ b/utils/smsq.c
+@@ -443,7 +443,7 @@ main (int argc, const char *argv[])
+       *queue = "",
+       *udfile = 0,
+       *process = 0,
+-      *spooldir = "/var/spool/asterisk",
++      *spooldir = "/opt/var/spool/asterisk",
+       *motxchannel = "Local/1709400X",
+       *motxcallerid = 0,
+       *mttxchannel = 0,
+--- a/Makefile
++++ b/Makefile
+@@ -149,9 +149,9 @@ ASTCONFPATH=$(ASTETCDIR)/asterisk.conf
+ AGI_DIR=$(ASTDATADIR)/agi-bin
+ 
+ # If you use Apache, you may determine by a grep 'DocumentRoot' of your httpd.conf file
+-HTTP_DOCSDIR=/var/www/html
++HTTP_DOCSDIR=/opt/var/www/html
+ # Determine by a grep 'ScriptAlias' of your Apache httpd.conf file
+-HTTP_CGIDIR=/var/www/cgi-bin
++HTTP_CGIDIR=/opt/var/www/cgi-bin
+ 
+ # If your platform's linker expects a prefix on symbols generated from compiling C
+ # source files, set LINKER_SYMBOL_PREFIX to that value. On some systems, exported symbols
+@@ -165,7 +165,7 @@ LINKER_SYMBOL_PREFIX=
+ #_ASTCFLAGS+=-DOLD_DSP_ROUTINES
+ 
+ # Default install directory for DAHDI hooks.
+-DAHDI_UDEV_HOOK_DIR = /usr/share/dahdi/span_config.d
++DAHDI_UDEV_HOOK_DIR = /opt/share/dahdi/span_config.d
+ 
+ # This Makefile previously contained a note about the ability to use .asterisk.makeopts
+ # from your home directory or /etc/asterisk.makeopts to set defaults for menuselect.
