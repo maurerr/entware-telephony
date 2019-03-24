@@ -4,7 +4,6 @@
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
-# asterisk-11.x
 
 include $(TOPDIR)/rules.mk
 
@@ -42,12 +41,6 @@ define Package/asterisk-chan-dongle/Default
   TITLE:=Huawei UMTS 3G dongle support
 endef
 
-define Package/asterisk11-chan-dongle
-$(call Package/asterisk-chan-dongle/Default)
-  DEPENDS+=asterisk11
-  VARIANT:=asterisk11
-endef
-
 define Package/asterisk13-chan-dongle
 $(call Package/asterisk-chan-dongle/Default)
   DEPENDS+=asterisk13
@@ -64,15 +57,8 @@ define Package/description/Default
  Asterisk channel driver for Huawei UMTS 3G dongle.
 endef
 
-Package/asterisk11-chan-dongle/description = $(Package/description/Default)
 Package/asterisk13-chan-dongle/description = $(Package/description/Default)
 Package/asterisk15-chan-dongle/description = $(Package/description/Default)
-
-ifeq ($(BUILD_VARIANT),asterisk11)
-  CHAN_DONGLE_AST_HEADERS:=$(STAGING_DIR)/opt/include/asterisk-11/include
-  CONFIGURE_ARGS+= \
-	  --with-astversion=11
-endif
 
 ifeq ($(BUILD_VARIANT),asterisk13)
   CHAN_DONGLE_AST_HEADERS:=$(STAGING_DIR)/opt/include/asterisk-13/include
@@ -103,7 +89,6 @@ define Package/conffiles/Default
 /opt/etc/asterisk/dongle.conf
 endef
 
-Package/asterisk11-chan-dongle/conffiles = $(Package/conffiles/Default)
 Package/asterisk13-chan-dongle/conffiles = $(Package/conffiles/Default)
 Package/asterisk15-chan-dongle/conffiles = $(Package/conffiles/Default)
 
@@ -114,10 +99,8 @@ define Package/Install/Default
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/chan_dongle.so $(1)$(MODULES_DIR)
 endef
 
-Package/asterisk11-chan-dongle/install = $(Package/Install/Default)
 Package/asterisk13-chan-dongle/install = $(Package/Install/Default)
 Package/asterisk15-chan-dongle/install = $(Package/Install/Default)
 
-$(eval $(call BuildPackage,asterisk11-chan-dongle))
-#$(eval $(call BuildPackage,asterisk13-chan-dongle))
-#$(eval $(call BuildPackage,asterisk15-chan-dongle))
+$(eval $(call BuildPackage,asterisk13-chan-dongle))
+$(eval $(call BuildPackage,asterisk15-chan-dongle))
