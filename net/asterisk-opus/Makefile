@@ -70,6 +70,11 @@ endef
 Package/asterisk13-codec-opus/description = $(Package/description/Default)
 Package/asterisk15-codec-opus/description = $(Package/description/Default)
 
+define Build/Prepare
+	$(call Build/Prepare/Default)
+	$(SED) 's,-I/usr,-I$(STAGING_DIR)/opt,' $(PKG_BUILD_DIR)/Makefile
+endef
+
 ifeq ($(BUILD_VARIANT),asterisk13)
 TARGET_CFLAGS+=-I$(STAGING_DIR)/opt/include/asterisk-13/include
 endif
@@ -90,5 +95,5 @@ Package/asterisk15-codec-opus/install = $(Package/Install/Default)
 define Build/Configure
 endef
 
-#$(eval $(call BuildPackage,asterisk13-codec-opus))
-#$(eval $(call BuildPackage,asterisk15-codec-opus))
+$(eval $(call BuildPackage,asterisk13-codec-opus))
+$(eval $(call BuildPackage,asterisk15-codec-opus))

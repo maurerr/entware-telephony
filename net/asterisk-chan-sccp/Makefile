@@ -1,23 +1,22 @@
 #
-# Copyright (C) 2016 - 2018 OpenWrt.org
+# Copyright (C) 2016 OpenWrt.org
 # Copyright (C) 2016 Cesnet, z.s.p.o.
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
-# asterisk-11.x
 
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=chan-sccp
-PKG_VERSION:=v4.3.0-20180322
-PKG_RELEASE:=2
+PKG_VERSION:=v4.3.1-20181225
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://github.com/chan-sccp/chan-sccp.git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_VERSION:=69fdf95837727c104f2394644bd21f83c2e4a4a3
-PKG_MIRROR_HASH:=fa755b5d8186b3baac99c93dc13e493b67c5054d114fcbef0ee93d18df5b6fcd
+PKG_SOURCE_VERSION:=614fc3e7514c56b233431f92b87e6cf211f5d925
+PKG_MIRROR_HASH:=9c56a5b9d0768bd79e5c2cc1c4704ffbbbe9c6d2a2f8d994ff145143d4814fda
 PKG_SOURCE_PROTO:=git
 
 PKG_FIXUP:=autoreconf
@@ -43,13 +42,6 @@ define Package/chan-sccp/Default
   DEPENDS:=$(ICONV_DEPENDS) +libltdl
 endef
 
-define Package/asterisk11-chan-sccp
-$(call Package/chan-sccp/Default)
-  DEPENDS+=asterisk11
-  VARIANT:=asterisk11
-  CONFLICTS:=asterisk11-chan-skinny
-endef
-
 define Package/asterisk13-chan-sccp
 $(call Package/chan-sccp/Default)
   DEPENDS+=asterisk13
@@ -70,7 +62,6 @@ Extended features include shared lines, presence / BLF, customizable
 feature buttons and custom device state.
 endef
 
-Package/asterisk11-chan-sccp/description = $(Package/description/Default)
 Package/asterisk13-chan-sccp/description = $(Package/description/Default)
 Package/asterisk15-chan-sccp/description = $(Package/description/Default)
 
@@ -79,10 +70,6 @@ CONFIGURE_ARGS += \
 	--enable-advanced-functions \
 	--enable-conference \
 	--enable-video
-
-ifeq ($(BUILD_VARIANT),asterisk11)
-  CONFIGURE_ARGS += --with-asterisk=$(STAGING_DIR)/opt/include/asterisk-11
-endif
 
 ifeq ($(BUILD_VARIANT),asterisk13)
   CONFIGURE_ARGS += --with-asterisk=$(STAGING_DIR)/opt/include/asterisk-13
@@ -96,7 +83,6 @@ define Package/conffiles/Default
 /opt/etc/asterisk/sccp.conf
 endef
 
-Package/asterisk11-chan-sccp/conffiles = $(Package/conffiles/Default)
 Package/asterisk13-chan-sccp/conffiles = $(Package/conffiles/Default)
 Package/asterisk15-chan-sccp/conffiles = $(Package/conffiles/Default)
 
@@ -107,10 +93,8 @@ define Package/Install/Default
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/opt/lib/asterisk/modules/chan_sccp.so $(1)/opt/lib/asterisk/modules/
 endef
 
-Package/asterisk11-chan-sccp/install = $(Package/Install/Default)
 Package/asterisk13-chan-sccp/install = $(Package/Install/Default)
 Package/asterisk15-chan-sccp/install = $(Package/Install/Default)
 
-$(eval $(call BuildPackage,asterisk11-chan-sccp))
-#$(eval $(call BuildPackage,asterisk13-chan-sccp))
-#$(eval $(call BuildPackage,asterisk15-chan-sccp))
+$(eval $(call BuildPackage,asterisk13-chan-sccp))
+$(eval $(call BuildPackage,asterisk15-chan-sccp))

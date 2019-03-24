@@ -1,8 +1,8 @@
-commit d3666a4ca5f949cd97e0f1d3f1e4c720880957f5
-Merge: 4395598 74adbc8
-Author: Jiri Slachta <jiri.slachta@gmail.com>
-Date:   Sun Dec 2 21:54:54 2018 +0100
+commit 9a8f3b372610bb9dc2bdbe58328f72125b15d200
+Merge: 6c2b619 abbbdaa
+Author: micmac1 <sebastian_ml@gmx.net>
+Date:   Fri Feb 15 21:55:19 2019 +0100
 
-    Merge pull request #394 from micmac1/kama-hot
+    Merge pull request #409 from micmac1/fs-185
     
-    rtpproxy & kamailio: fix hotplug script file names
+    freeswitch-stable: fix compile, bump version

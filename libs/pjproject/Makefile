@@ -10,12 +10,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=pjproject
-PKG_VERSION:=2.7.2
-PKG_RELEASE:=3
+PKG_VERSION:=2.8
+PKG_RELEASE:=1
 
 PKG_SOURCE:=pjproject-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=http://www.pjsip.org/release/$(PKG_VERSION)
-PKG_HASH:=9c2c828abab7626edf18e04b041ef274bfaa86f99adf2c25ff56f1509e813772
+PKG_HASH:=503d0bd7f9f13dc1492ac9b71b761b1089851fbb608b9a13996edc3c42006f79
 PKG_INSTALL:=1
 PKG_FIXUP:=autoreconf
 
@@ -27,7 +27,6 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_CONFIG_DEPENDS:=CONFIG_SOFT_FLOAT
 
-include $(INCLUDE_DIR)/uclibc++.mk
 include $(INCLUDE_DIR)/package.mk
 
 define Package/pjproject/Default
@@ -35,12 +34,12 @@ define Package/pjproject/Default
   CATEGORY:=Libraries
   SUBMENU:=Telephony
   URL:=http://www.pjsip.org
-  DEPENDS:=$(CXX_DEPENDS) +libopenssl +libuuid +libpthread
+  DEPENDS:=+libstdcpp +libopenssl +libuuid +libpthread
 endef
 
 define Package/pjproject/install/lib
-	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/$(2).so* $(1)/usr/lib
+	$(INSTALL_DIR) $(1)/opt/lib
+	$(CP) $(PKG_INSTALL_DIR)/opt/lib/$(2).so* $(1)/opt/lib
 endef
 
 define PJSIPpackage
@@ -74,7 +73,6 @@ CONFIGURE_ARGS+= \
 	--disable-opencore-amr \
 	--disable-openh264 \
 	--disable-opus \
-	--disable-oss \
 	--disable-resample \
 	--disable-sdl \
 	--disable-silk \
@@ -84,8 +82,8 @@ CONFIGURE_ARGS+= \
 	--disable-v4l2 \
 	--disable-video \
 	--enable-shared \
-	--with-external-srtp="$(STAGING_DIR)/usr" \
-	--with-ssl="$(STAGING_DIR)/usr" \
+	--with-external-srtp="$(STAGING_DIR)/opt" \
+	--with-ssl="$(STAGING_DIR)/opt" \
 	--without-external-gsm \
 	--without-external-pa \
 	--without-external-webrtc
@@ -101,15 +99,15 @@ PJPROJECT_LIBS:= \
 	libpjsip-ua libpjsip libpjsua libpjsua2
 
 define Build/InstallDev
-	$(INSTALL_DIR) $(1)/usr/{include,lib}
+	$(INSTALL_DIR) $(1)/opt/{include,lib}
 	
-	$(CP) -R $(PKG_INSTALL_DIR)/usr/include/* $(1)/usr/include
+	$(CP) -R $(PKG_INSTALL_DIR)/opt/include/* $(1)/opt/include
 
-	$(foreach m,$(PJPROJECT_LIBS),$(CP) $(PKG_INSTALL_DIR)/usr/lib/$(m)* $(1)/usr/lib;)
+	$(foreach m,$(PJPROJECT_LIBS),$(CP) $(PKG_INSTALL_DIR)/opt/lib/$(m)* $(1)/opt/lib;)
 
-	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(SED) 's|$(TARGET_CFLAGS)||g' $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/libpjproject.pc
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/libpjproject.pc $(1)/usr/lib/pkgconfig
+	$(INSTALL_DIR) $(1)/opt/lib/pkgconfig
+	$(SED) 's|$(TARGET_CFLAGS)||g' $(PKG_INSTALL_DIR)/opt/lib/pkgconfig/libpjproject.pc
+	$(CP) $(PKG_INSTALL_DIR)/opt/lib/pkgconfig/libpjproject.pc $(1)/opt/lib/pkgconfig
 endef
 
 $(eval $(call PJSIPpackage,libpj,libpj,+librt))
