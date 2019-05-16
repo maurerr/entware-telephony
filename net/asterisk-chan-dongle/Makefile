@@ -47,10 +47,10 @@ $(call Package/asterisk-chan-dongle/Default)
   VARIANT:=asterisk13
 endef
 
-define Package/asterisk15-chan-dongle
+define Package/asterisk16-chan-dongle
 $(call Package/asterisk-chan-dongle/Default)
-  DEPENDS+=asterisk15
-  VARIANT:=asterisk15
+  DEPENDS+=asterisk16
+  VARIANT:=asterisk16
 endef
 
 define Package/description/Default
@@ -58,7 +58,7 @@ define Package/description/Default
 endef
 
 Package/asterisk13-chan-dongle/description = $(Package/description/Default)
-Package/asterisk15-chan-dongle/description = $(Package/description/Default)
+Package/asterisk16-chan-dongle/description = $(Package/description/Default)
 
 ifeq ($(BUILD_VARIANT),asterisk13)
   CHAN_DONGLE_AST_HEADERS:=$(STAGING_DIR)/opt/include/asterisk-13/include
@@ -66,10 +66,10 @@ ifeq ($(BUILD_VARIANT),asterisk13)
 	  --with-astversion=13
 endif
 
-ifeq ($(BUILD_VARIANT),asterisk15)
-  CHAN_DONGLE_AST_HEADERS:=$(STAGING_DIR)/opt/include/asterisk-15/include
+ifeq ($(BUILD_VARIANT),asterisk16)
+  CHAN_DONGLE_AST_HEADERS:=$(STAGING_DIR)/opt/include/asterisk-16/include
   CONFIGURE_ARGS+= \
-	  --with-astversion=15
+	  --with-astversion=16
 endif
 
 CONFIGURE_ARGS+= \
@@ -90,7 +90,7 @@ define Package/conffiles/Default
 endef
 
 Package/asterisk13-chan-dongle/conffiles = $(Package/conffiles/Default)
-Package/asterisk15-chan-dongle/conffiles = $(Package/conffiles/Default)
+Package/asterisk16-chan-dongle/conffiles = $(Package/conffiles/Default)
 
 define Package/Install/Default
 	$(INSTALL_DIR) $(1)/opt/etc/asterisk
@@ -100,7 +100,7 @@ define Package/Install/Default
 endef
 
 Package/asterisk13-chan-dongle/install = $(Package/Install/Default)
-Package/asterisk15-chan-dongle/install = $(Package/Install/Default)
+Package/asterisk16-chan-dongle/install = $(Package/Install/Default)
 
 $(eval $(call BuildPackage,asterisk13-chan-dongle))
-$(eval $(call BuildPackage,asterisk15-chan-dongle))
+$(eval $(call BuildPackage,asterisk16-chan-dongle))
