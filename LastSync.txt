@@ -1,8 +1,8 @@
-commit 9a8f3b372610bb9dc2bdbe58328f72125b15d200
-Merge: 6c2b619 abbbdaa
+commit 470eb8e53290afe6839eaa89d4e8ed85e3a1cff2
+Merge: 3e73624 1c2023b
 Author: micmac1 <sebastian_ml@gmx.net>
-Date:   Fri Feb 15 21:55:19 2019 +0100
+Date:   Sun May 12 14:07:37 2019 +0200
 
-    Merge pull request #409 from micmac1/fs-185
+    Merge pull request #426 from micmac1/fs-init-awk
     
-    freeswitch-stable: fix compile, bump version
+    freeswitch-stable: init script update

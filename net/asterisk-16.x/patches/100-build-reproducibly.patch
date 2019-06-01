@@ -6,7 +6,7 @@
  DATE=`date -u "+%Y-%m-%d %H:%M:%S"`
 +if [ -n "${SOURCE_DATE_EPOCH}" ]; then
 +	# building reproducibly, faking some data
-+	HOSTNAME='buildd.debian.org'
++	HOSTNAME='openwrt.org'
 +	KERNEL='unknown'
 +	MACHINE='unknown'
 +	USER='nobody'
@@ -17,7 +17,7 @@
   * build.h
 --- a/Makefile
 +++ b/Makefile
-@@ -487,7 +487,7 @@ doc/core-en_US.xml: makeopts .lastclean
+@@ -484,7 +484,7 @@ doc/core-en_US.xml: makeopts .lastclean
  	@echo "<docs xmlns:xi=\"http://www.w3.org/2001/XInclude\">" >> $@
  	@for x in $(MOD_SUBDIRS); do \
  		printf "$$x " ; \

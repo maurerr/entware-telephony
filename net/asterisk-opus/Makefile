@@ -47,10 +47,10 @@ $(call Package/$(PKG_NAME)/Default)
   VARIANT:=asterisk13
 endef
 
-define Package/asterisk15-codec-opus
+define Package/asterisk16-codec-opus
 $(call Package/$(PKG_NAME)/Default)
-  DEPENDS+=asterisk15
-  VARIANT:=asterisk15
+  DEPENDS+=asterisk16
+  VARIANT:=asterisk16
 endef
 
 define Package/description/Default
@@ -68,7 +68,7 @@ define Package/description/Default
 endef
 
 Package/asterisk13-codec-opus/description = $(Package/description/Default)
-Package/asterisk15-codec-opus/description = $(Package/description/Default)
+Package/asterisk16-codec-opus/description = $(Package/description/Default)
 
 define Build/Prepare
 	$(call Build/Prepare/Default)
@@ -79,8 +79,8 @@ ifeq ($(BUILD_VARIANT),asterisk13)
 TARGET_CFLAGS+=-I$(STAGING_DIR)/opt/include/asterisk-13/include
 endif
 
-ifeq ($(BUILD_VARIANT),asterisk15)
-TARGET_CFLAGS+=-I$(STAGING_DIR)/opt/include/asterisk-15/include
+ifeq ($(BUILD_VARIANT),asterisk16)
+TARGET_CFLAGS+=-I$(STAGING_DIR)/opt/include/asterisk-16/include
 endif
 
 define Package/Install/Default
@@ -90,10 +90,10 @@ define Package/Install/Default
 endef
 
 Package/asterisk13-codec-opus/install = $(Package/Install/Default)
-Package/asterisk15-codec-opus/install = $(Package/Install/Default)
+Package/asterisk16-codec-opus/install = $(Package/Install/Default)
 
 define Build/Configure
 endef
 
 $(eval $(call BuildPackage,asterisk13-codec-opus))
-$(eval $(call BuildPackage,asterisk15-codec-opus))
+$(eval $(call BuildPackage,asterisk16-codec-opus))

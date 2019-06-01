@@ -7,7 +7,7 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=asterisk15-chan-lantiq
+PKG_NAME:=asterisk16-chan-lantiq
 PKG_VERSION:=20180215
 PKG_RELEASE:=2
 
@@ -32,11 +32,11 @@ define Package/$(PKG_NAME)
   CATEGORY:=Network
   TITLE:=Lantiq channel driver
   URL:=https://github.com/kochstefan/asterisk_channel_lantiq
-  DEPENDS:=+asterisk15 +kmod-ltq-vmmc
+  DEPENDS:=+asterisk16 +kmod-ltq-vmmc
 endef
 
 define Package/$(PKG_NAME)/description
-An implementation of a Lantiq TAPI channel driver for Asterisk 15.
+An implementation of a Lantiq TAPI channel driver for Asterisk 16.
 endef
 
 define Package/$(PKG_NAME)/conffiles
@@ -54,7 +54,7 @@ define Build/Compile
 	$(TARGET_CC) -o chan_lantiq.o -c chan_lantiq.c -MD -MT chan_lantiq.o \
 		-MF .chan_lantiq.o.d -MP -pthread \
 		$(TARGET_CFLAGS) -DAST_MODULE_SELF_SYM=__internal_chan_lantiq_self \
-		-I$(STAGING_DIR)/usr/include/asterisk-15/include \
+		-I$(STAGING_DIR)/usr/include/asterisk-16/include \
 		$(TARGET_CPPFLAGS) \
 		-Wall -Wstrict-prototypes -Wmissing-prototypes \
 		-Wmissing-declarations $(FPIC) -DAST_MODULE=\"chan_lantiq\" && \
