@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 PRG_NAME:=freeswitch
 PKG_NAME:=$(PRG_NAME)-stable
 PKG_VERSION:=1.8.5
-PKG_RELEASE:=1
+PKG_RELEASE:=3
 PKG_MAINTAINER:=Sebastian Kemper <sebastian_ml@gmx.net>
 
 PKG_SOURCE:=$(PRG_NAME)-$(PKG_VERSION).tar.xz
@@ -998,7 +998,7 @@ $(eval $(call Package/$(PKG_NAME)/Module,abstraction,API abstraction,This module
 $(eval $(call Package/$(PKG_NAME)/Module,alsa,ALSA endpoint,ALSA endpoint module.,+alsa-lib))
 $(eval $(call Package/$(PKG_NAME)/Module,amr,AMR passthrough,Passthrough AMR codec support.,))
 $(eval $(call Package/$(PKG_NAME)/Module,amrwb,AMR wideband passthrough,Passthrough AMR wideband codec support.,))
-$(eval $(call Package/$(PKG_NAME)/Module,av,AV,Video codec and format support via FFmpeg.,+libffmpeg-full @i386||x86_64))
+$(eval $(call Package/$(PKG_NAME)/Module,av,AV,Video codec and format support via FFmpeg.,+libffmpeg-full @x86_64))
 $(eval $(call Package/$(PKG_NAME)/Module,avmd,Voicemail detection,This module attempts to determine when a voicemail system has answered\nthe call.,))
 $(eval $(call Package/$(PKG_NAME)/Module,b64,Base64,Transfers data Base64 encoded.,))
 $(eval $(call Package/$(PKG_NAME)/Module,basic,BASIC,BASIC module for FreeSWITCH.,))
