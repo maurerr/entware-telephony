@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 AST_MAJOR_VERSION:=16
 PKG_NAME:=asterisk$(AST_MAJOR_VERSION)
 PKG_VERSION:=$(AST_MAJOR_VERSION).3.0
-PKG_RELEASE:=2
+PKG_RELEASE:=6
 
 PKG_SOURCE:=asterisk-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://downloads.asterisk.org/pub/telephony/asterisk/releases
@@ -126,7 +126,6 @@ MODULES_AVAILABLE:= \
 	chan-motif \
 	chan-ooh323 \
 	chan-oss \
-	chan-phone \
 	chan-rtp \
 	chan-sip \
 	chan-skinny \
@@ -853,7 +852,6 @@ $(eval $(call BuildAsteriskModule,chan-mobile,Bluetooth channel,Bluetooth mobile
 $(eval $(call BuildAsteriskModule,chan-motif,Jingle channel,Motif Jingle channel driver.,+$(PKG_NAME)-res-xmpp,motif.conf,chan_motif,,))
 $(eval $(call BuildAsteriskModule,chan-ooh323,H.323 channel,Objective Systems H.323 channel.,,ooh323.conf,chan_ooh323,,))
 $(eval $(call BuildAsteriskModule,chan-oss,OSS channel,OSS console channel driver.,,oss.conf,chan_oss,,))
-$(eval $(call BuildAsteriskModule,chan-phone,Linux telephony API,Linux telephony API support.,,phone.conf,chan_phone,,))
 $(eval $(call BuildAsteriskModule,chan-rtp,RTP media channel,RTP media channel.,,,chan_rtp,,))
 $(eval $(call BuildAsteriskModule,chan-sip,SIP channel,Session Initiation Protocol.,+$(PKG_NAME)-app-confbridge,sip.conf sip_notify.conf,chan_sip,,))
 $(eval $(call BuildAsteriskModule,chan-skinny,Skinny channel,Skinny Client Control Protocol.,,skinny.conf,chan_skinny,,))
@@ -935,7 +933,7 @@ $(eval $(call BuildAsteriskModule,odbc,ODBC,ODBC support.,+libpthread +libc +uni
 $(eval $(call BuildAsteriskModule,pbx-ael,Asterisk Extension Logic,Asterisk Extension Language compiler.,+$(PKG_NAME)-res-ael-share,extensions.ael,pbx_ael,,))
 $(eval $(call BuildAsteriskModule,pbx-dundi,Dundi,Distributed Universal Number Discovery.,,dundi.conf,pbx_dundi,,))
 $(eval $(call BuildAsteriskModule,pbx-loopback,Loopback switch,Loopback switch.,,,pbx_loopback,,))
-$(eval $(call BuildAsteriskModule,pbx-lua,Lua,Lua PBX switch.,+liblua,extensions.lua,pbx_lua,,))
+$(eval $(call BuildAsteriskModule,pbx-lua,Lua,Lua PBX switch.,+liblua5.3,extensions.lua,pbx_lua,,))
 $(eval $(call BuildAsteriskModule,pbx-realtime,Realtime Switch,Realtime switch.,,,pbx_realtime,,))
 $(eval $(call BuildAsteriskModule,pbx-spool,Call Spool,Outgoing spool support.,,,pbx_spool,,))
 $(eval $(call BuildAsteriskModule,pgsql,PostgreSQL,PostgreSQL support.,+libpq,cel_pgsql.conf cdr_pgsql.conf res_pgsql.conf,cel_pgsql cdr_pgsql res_config_pgsql,,))
