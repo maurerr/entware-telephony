@@ -1,6 +1,6 @@
 --- a/chan_dongle.c
 +++ b/chan_dongle.c
-@@ -116,7 +116,7 @@
+@@ -116,7 +116,7 @@ static int lock_build(const char * devna
  		basename = devname;
  
  	/* NOTE: use system system wide lock directory */
@@ -11,7 +11,7 @@
  #/* return 0 on error */
 --- a/tools/tty.c
 +++ b/tools/tty.c
-@@ -44,7 +44,7 @@
+@@ -44,7 +44,7 @@ static int lock_build(const char * devna
  		basename = devname;
  
  	/* TODO: use asterisk build settings for /var/lock */
