@@ -9,17 +9,17 @@ include $(TOPDIR)/rules.mk
 
 PRG_NAME:=freeswitch
 PKG_NAME:=$(PRG_NAME)-stable
-PKG_VERSION:=1.8.5
-PKG_RELEASE:=3
+PKG_VERSION:=1.10.1
+PKG_RELEASE:=2
 PKG_MAINTAINER:=Sebastian Kemper <sebastian_ml@gmx.net>
 
-PKG_SOURCE:=$(PRG_NAME)-$(PKG_VERSION).tar.xz
+PKG_SOURCE:=$(PRG_NAME)-$(PKG_VERSION).-release.tar.xz
 PKG_SOURCE_URL:=https://files.$(PRG_NAME).org/releases/$(PRG_NAME)
-PKG_HASH:=503a551be5d6df06162ea9d98a952b6fb524852ce2352fe3ca3a36a76995b046
+PKG_HASH:=360c867103c5f529a3724a46cf86da9b9acd8443b6793eb7f88fba0ace72001d
 
 PKG_CPE_ID:=cpe:/a:freeswitch:freeswitch
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PRG_NAME)-$(PKG_VERSION)
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PRG_NAME)-$(PKG_VERSION).-release
 
 # configure in libs/spandsp fails without libjpeg and tiff
 PKG_BUILD_DEPENDS:= \
@@ -147,13 +147,16 @@ FS_STABLE_MOD_AVAILABLE:= \
 	logfile \
 	loopback \
 	lua \
+	mariadb \
 	mp4v \
 	native_file \
 	nibblebill \
 	odbc_cdr \
 	opus \
+	opusfile \
 	oreka \
 	perl \
+	pgsql \
 	png \
 	pocketsphinx \
 	portaudio \
@@ -227,7 +230,6 @@ PKG_CONFIG_DEPENDS:= \
 	CONFIG_FS_STABLE_WITH_FREETYPE \
 	CONFIG_FS_STABLE_WITH_LIBYUV \
 	CONFIG_FS_STABLE_WITH_ODBC \
-	CONFIG_FS_STABLE_WITH_PGSQL \
 	CONFIG_FS_STABLE_WITH_PNG \
 	CONFIG_FS_STABLE_WITH_SRTP \
 	CONFIG_FS_STABLE_WITH_VPX \
@@ -304,7 +306,7 @@ endef
 
 define Package/$(PKG_NAME)/install/lib
 	$(INSTALL_DIR) $(1)$(FS_STABLE_LIB_DIR)
-	$(CP) $(PKG_INSTALL_DIR)$(FS_STABLE_LIB_DIR)/$(2).so* \
+	$(CP) $(PKG_INSTALL_DIR)$(FS_STABLE_LIB_DIR)/$(2).so.* \
 					$(1)$(FS_STABLE_LIB_DIR)
 endef
 
@@ -374,7 +376,6 @@ $(call Package/$(PKG_NAME)/Default)
 	  $(ICONV_DEPENDS) \
 	  +FS_STABLE_WITH_FREETYPE:libfreetype \
 	  +FS_STABLE_WITH_ODBC:unixodbc \
-	  +FS_STABLE_WITH_PGSQL:libpq \
 	  +FS_STABLE_WITH_PNG:libpng \
 	  +libcurl \
 	  +libedit \
@@ -419,7 +420,7 @@ $(call Package/$(PKG_NAME)/install/lib,$(1),lib$(PRG_NAME))
 		$(1)$(FS_STABLE_SYSCONF_DIR)/init.d/$(PRG_NAME)
 	$(INSTALL_BIN) ./files/$(PRG_NAME).hotplug \
 		$(1)$(FS_STABLE_SYSCONF_DIR)/hotplug.d/iface/90-$(PRG_NAME)
-	$(INSTALL_CONF) ./files/$(PRG_NAME).config \
+	$(INSTALL_CONF) ./files/$(PRG_NAME).conf \
 		$(1)$(FS_STABLE_SYSCONF_DIR)/config/$(PRG_NAME)
 endef
 
@@ -645,14 +646,12 @@ CONFIGURE_ARGS+= \
 	$(call autoconf_bool,CONFIG_FS_STABLE_WITH_DEBUG,debug) \
 	$(call autoconf_bool,CONFIG_FS_STABLE_WITH_LIBYUV,libyuv) \
 	$(call autoconf_bool,CONFIG_FS_STABLE_WITH_ODBC,core-odbc-support) \
-	$(call autoconf_bool,CONFIG_FS_STABLE_WITH_PGSQL,core-pgsql-support) \
 	$(call autoconf_bool,CONFIG_FS_STABLE_WITH_SRTP,srtp) \
 	$(call autoconf_bool,CONFIG_FS_STABLE_WITH_VPX,libvpx) \
 	$(call autoconf_bool,CONFIG_FS_STABLE_WITH_ZRTP,zrtp) \
 	$(if $(CONFIG_FS_STABLE_WITH_FREETYPE),,--without-freetype) \
 	$(if $(CONFIG_FS_STABLE_WITH_ODBC),--with-odbc-lib="$(STAGING_DIR)$(FS_STABLE_LIB_DIR)") \
 	$(if $(CONFIG_FS_STABLE_WITH_ODBC),--with-odbc="$(STAGING_DIR)/usr") \
-	$(if $(CONFIG_FS_STABLE_WITH_PGSQL),,--without-pgsql) \
 	$(if $(CONFIG_FS_STABLE_WITH_PNG),,--without-png) \
 	$(if $(CONFIG_PACKAGE_$(PKG_LIBFTDM)-ftmod-libpri),--with-libpri="$(STAGING_DIR)/usr",--without-libpri) \
 	$(if $(CONFIG_PACKAGE_$(PKG_LIBFTDM)-ftmod-pritap),--with-pritap,--without-pritap)
@@ -676,6 +675,13 @@ ifeq ($(CONFIG_SOFT_FLOAT),y)
 CONFIGURE_ARGS+= \
 	--enable-fixed-point
 endif
+
+# FreeSWITCH dropped postgresql support from the core. postgresql
+# support is now available via mod_pgsql. We still need to pass
+# '--without-pgsql', otherwise apr-util links to libpq and we still
+# would have the core link to it.
+CONFIGURE_ARGS+= \
+	--without-pgsql
 
 # Don't want host-php
 CONFIGURE_VARS+= \
@@ -712,8 +718,7 @@ CONFIGURE_VARS+= \
 
 # Regarding apr_cv_mutex_robust_shared=no see
 # http://www.openwall.com/lists/musl/2016/11/26/1
-# _Don't_ remove quotes below!
-ifeq ($(CONFIG_LIBC),"musl")
+ifeq ($(call qstrip,$(CONFIG_LIBC)),musl)
 CONFIGURE_VARS+= \
 	apr_cv_mutex_robust_shared=no \
 	ac_cv_strerror_r_rc_int=yes
@@ -1007,7 +1012,7 @@ $(eval $(call Package/$(PKG_NAME)/Module,blacklist,Blacklist helper,This module 
 $(eval $(call Package/$(PKG_NAME)/Module,callcenter,Call center,This module implements Automated Call Distribution queues.,))
 $(eval $(call Package/$(PKG_NAME)/Module,cdr_csv,CSV CDR,CSV Call Detail Record handler.,))
 $(eval $(call Package/$(PKG_NAME)/Module,cdr_mongodb,MongoDB CDR,MongoDB Call Detail Record handler.,))
-$(eval $(call Package/$(PKG_NAME)/Module,cdr_pg_csv,PostgreSQL CDR,PostgreSQL Call Detail Record handler.,@FS_STABLE_WITH_PGSQL))
+$(eval $(call Package/$(PKG_NAME)/Module,cdr_pg_csv,PostgreSQL CDR,PostgreSQL Call Detail Record handler.,+libpq))
 $(eval $(call Package/$(PKG_NAME)/Module,cdr_sqlite,SQLite CDR,SQLite Call Detail Record handler.,))
 $(eval $(call Package/$(PKG_NAME)/Module,cidlookup,Caller ID lookup,This module provides an API for querying caller ID name and location\ndata.,))
 $(eval $(call Package/$(PKG_NAME)/Module,clearmode,Clearmode,Clearmode codec passthrough support.,))
@@ -1060,13 +1065,16 @@ $(eval $(call Package/$(PKG_NAME)/Module,local_stream,Local stream,Connects mult
 $(eval $(call Package/$(PKG_NAME)/Module,logfile,File logger,Logs FreeSWITCH output to a file.,))
 $(eval $(call Package/$(PKG_NAME)/Module,loopback,Loopback,A loopback channel driver.,))
 $(eval $(call Package/$(PKG_NAME)/Module,lua,Lua,Lua language interface for FreeSWITCH.,+liblua))
-$(eval $(call Package/$(PKG_NAME)/Module,mp4v,MP4 video passthrough,MP4 video passthrough..,))
+$(eval $(call Package/$(PKG_NAME)/Module,mariadb,MariaDB,Adds MariaDB support.,+libmariadb @!USE_UCLIBCXX))
+$(eval $(call Package/$(PKG_NAME)/Module,mp4v,MP4 video passthrough,MP4 video passthrough.,))
 $(eval $(call Package/$(PKG_NAME)/Module,native_file,Native file,Plays files that are already encoded in the right format.,))
 $(eval $(call Package/$(PKG_NAME)/Module,nibblebill,Nibblebill,This module allows for real-time accounting of a cash balance and\nusing that information for call routing.,))
 $(eval $(call Package/$(PKG_NAME)/Module,odbc_cdr,ODBC CDR,ODBC Call Detail Record handler.,))
 $(eval $(call Package/$(PKG_NAME)/Module,opus,Opus,Opus codec support.,+libopus))
+$(eval $(call Package/$(PKG_NAME)/Module,opusfile,Opus file,Read and Write OGG/Opus files.,+libopusenc +libopusfile))
 $(eval $(call Package/$(PKG_NAME)/Module,oreka,Oreka,This module provides media recording with the Oreka cross-platform\naudio stream recording and retrieval system.,))
 $(eval $(call Package/$(PKG_NAME)/Module,perl,Perl,This package contains mod_perl for FreeSWITCH.,+libdb47 +libgdbm +perlbase-essential @PERL_THREADS))
+$(eval $(call Package/$(PKG_NAME)/Module,pgsql,PostgreSQL,Adds PostgreSQL support.,+libpq))
 $(eval $(call Package/$(PKG_NAME)/Module,png,PNG,Allows playback of video using PNG files.,@FS_STABLE_WITH_PNG))
 $(eval $(call Package/$(PKG_NAME)/Module,pocketsphinx,Pocketsphinx,This module allows speech recognition. You might want to install\n$(PKG_NAME)-misc-grammar as well.,+libsamplerate)) # When libsamplerate is found it'll be linked against, there is no switch to turn it off
 $(eval $(call Package/$(PKG_NAME)/Module,portaudio,Portaudio,Voice through a local soundcard.,+portaudio))
@@ -1147,5 +1155,6 @@ $(eval $(call Package/$(PKG_NAME)/Module,yuv,Raw YUV,Raw YUV I420 video codec su
 $(eval $(call Package/$(PKG_NAME)/Util,fs_cli,CLI,The fs_cli program is a Command-Line Interface that allows a user to\nconnect to a FreeSWITCH instance running on the local or a remote\nsystem.,,n))
 $(eval $(call Package/$(PKG_NAME)/Util,fs_encode,Sound file conversion,Format conversion of sound files so the result can be used by\nmod_native_file.,+$(PKG_NAME)-mod-native-file +$(PKG_NAME)-mod-sndfile +$(PKG_NAME)-mod-spandsp,n))
 $(eval $(call Package/$(PKG_NAME)/Util,fs_ivrd,IVR daemon,The FreeSWITCH IVR daemon is an abstraction layer that sits on top of\nthe ESL. The basic idea is that the ivrd will allow the user to have\na STDIN/STDOUT interface for simple call control.,,n))
+$(eval $(call Package/$(PKG_NAME)/Util,fs_tts,TTS to sound file,Use TTS to generate a sound file.,,n))
 $(eval $(call Package/$(PKG_NAME)/Util,gentls_cert,TLS certificate,Can be used to create TLS certificates and setup CAs.,+openssl-util,y))
 $(eval $(call Package/$(PKG_NAME)/Util,tone2wav,Sound file generation,Generates a sound file from a teletone script. The output can be in\nany format that is supported by libsndfile.,+$(PKG_NAME)-mod-sndfile,n))
