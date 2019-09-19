@@ -41,12 +41,6 @@ define Package/$(PKG_NAME)/Default
   DEPENDS:=+libopus
 endef
 
-define Package/asterisk13-codec-opus
-$(call Package/$(PKG_NAME)/Default)
-  DEPENDS+=asterisk13
-  VARIANT:=asterisk13
-endef
-
 define Package/asterisk16-codec-opus
 $(call Package/$(PKG_NAME)/Default)
   DEPENDS+=asterisk16
@@ -67,17 +61,12 @@ define Package/description/Default
   well.
 endef
 
-Package/asterisk13-codec-opus/description = $(Package/description/Default)
 Package/asterisk16-codec-opus/description = $(Package/description/Default)
 
 define Build/Prepare
 	$(call Build/Prepare/Default)
 	$(SED) 's,-I/usr,-I$(STAGING_DIR)/opt,' $(PKG_BUILD_DIR)/Makefile
 endef
-
-ifeq ($(BUILD_VARIANT),asterisk13)
-TARGET_CFLAGS+=-I$(STAGING_DIR)/opt/include/asterisk-13/include
-endif
 
 ifeq ($(BUILD_VARIANT),asterisk16)
 TARGET_CFLAGS+=-I$(STAGING_DIR)/opt/include/asterisk-16/include
@@ -89,11 +78,9 @@ define Package/Install/Default
 		$(1)/opt/lib/asterisk/modules
 endef
 
-Package/asterisk13-codec-opus/install = $(Package/Install/Default)
 Package/asterisk16-codec-opus/install = $(Package/Install/Default)
 
 define Build/Configure
 endef
 
-$(eval $(call BuildPackage,asterisk13-codec-opus))
 $(eval $(call BuildPackage,asterisk16-codec-opus))

@@ -1,5 +1,5 @@
---- a/Makefile	2019-02-25 14:24:16.623415389 +0300
-+++ b/Makefile	2019-02-25 14:32:22.131486359 +0300
+--- a/Makefile
++++ b/Makefile
 @@ -1,4 +1,4 @@
 -prefix=/usr/local
 +prefix=/opt
