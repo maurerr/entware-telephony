@@ -9,14 +9,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=chan-sccp
-PKG_VERSION:=v4.3.2-20190411
-PKG_RELEASE:=2
+PKG_VERSION:=v4.3.2-20190730
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://github.com/chan-sccp/chan-sccp.git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_VERSION:=da59f2f073502645b34b458392a1fb11465f48cc
-PKG_MIRROR_HASH:=a449c3384b92ff79b2db4d6b4e8dc7a3fb668f4c0f1a65baa198578b0b953ab8
+PKG_SOURCE_VERSION:=08c9457b131e2e7fea92b2dfea786abfd171a5fe
+PKG_MIRROR_HASH:=be86af36c2ba4524d392fab1b88e4f4ceaaea6678dd814443ae5636337ed4c77
 PKG_SOURCE_PROTO:=git
 
 PKG_FIXUP:=autoreconf
@@ -42,19 +42,6 @@ define Package/chan-sccp/Default
   DEPENDS:=$(ICONV_DEPENDS) +libltdl
 endef
 
-define Package/asterisk13-chan-sccp
-$(call Package/chan-sccp/Default)
-  DEPENDS += asterisk13 \
-	  +asterisk13-bridge-holding \
-	  +asterisk13-bridge-native-rtp \
-	  +asterisk13-bridge-simple \
-	  +asterisk13-bridge-softmix \
-	  +asterisk13-res-stasis-device-state \
-	  +asterisk13-voicemail
-  VARIANT:=asterisk13
-  CONFLICTS:=asterisk13-chan-skinny
-endef
-
 define Package/asterisk16-chan-sccp
 $(call Package/chan-sccp/Default)
   DEPENDS += asterisk16 \
@@ -74,7 +61,6 @@ Extended features include shared lines, presence / BLF, customizable
 feature buttons and custom device state.
 endef
 
-Package/asterisk13-chan-sccp/description = $(Package/description/Default)
 Package/asterisk16-chan-sccp/description = $(Package/description/Default)
 
 CONFIGURE_ARGS += \
@@ -82,10 +68,6 @@ CONFIGURE_ARGS += \
 	--enable-advanced-functions \
 	--enable-conference \
 	--enable-video
-
-ifeq ($(BUILD_VARIANT),asterisk13)
-  CONFIGURE_ARGS += --with-asterisk=$(STAGING_DIR)/opt/include/asterisk-13
-endif
 
 ifeq ($(BUILD_VARIANT),asterisk16)
   CONFIGURE_ARGS += --with-asterisk=$(STAGING_DIR)/opt/include/asterisk-16
@@ -95,7 +77,6 @@ define Package/conffiles/Default
 /opt/etc/asterisk/sccp.conf
 endef
 
-Package/asterisk13-chan-sccp/conffiles = $(Package/conffiles/Default)
 Package/asterisk16-chan-sccp/conffiles = $(Package/conffiles/Default)
 
 define Package/Install/Default
@@ -105,8 +86,6 @@ define Package/Install/Default
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/opt/lib/asterisk/modules/chan_sccp.so $(1)/opt/lib/asterisk/modules/
 endef
 
-Package/asterisk13-chan-sccp/install = $(Package/Install/Default)
 Package/asterisk16-chan-sccp/install = $(Package/Install/Default)
 
-$(eval $(call BuildPackage,asterisk13-chan-sccp))
 $(eval $(call BuildPackage,asterisk16-chan-sccp))

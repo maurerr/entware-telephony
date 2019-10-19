@@ -8,8 +8,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=sngrep
-PKG_VERSION=1.4.6
-PKG_RELEASE:=1
+PKG_VERSION:=1.4.6
+PKG_RELEASE:=1a
 PKG_MAINTAINER:=Sebastian Kemper <sebastian_ml@gmx.net>
 PKG_LICENSE:=GPL-3.0+
 PKG_LICENSE_FILES:=COPYING
@@ -43,7 +43,7 @@ in one packet).
 endef
 
 define Package/sngrep/conffiles
-/etc/sngreprc
+/opt/etc/sngreprc
 endef
 
 CONFIGURE_ARGS += \

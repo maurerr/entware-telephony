@@ -1,6 +1,6 @@
 --- a/autoconf/acinclude.m4
 +++ b/autoconf/acinclude.m4
-@@ -105,7 +105,7 @@
+@@ -112,7 +112,7 @@ AC_DEFUN([CS_CHECK_PBX], [
  					PBX_CPPFLAGS="-I${checkdir}/include -DHAVE_ASTERISK";
  					CFLAGS="$CFLAGS -I${checkdir}/include -DHAVE_ASTERISK";
  					CPPFLAGS="$CPPFLAGS -I${checkdir}/include -DHAVE_ASTERISK";
@@ -9,7 +9,7 @@
  				fi
  				AC_MSG_RESULT(found)
  				break
-@@ -119,9 +119,9 @@
+@@ -126,9 +126,9 @@ AC_DEFUN([CS_CHECK_PBX], [
  		else
  			if test x_$found_asterisk = x_yes; then
  				AC_MSG_RESULT([Asterisk found in ${checkdir}])
@@ -22,7 +22,7 @@
  				if test -f "${checkdir}/etc/asterisk/asterisk.conf"; then
  					PBX_PREFIX="${checkdir}"
  					PBX_ETC="${checkdir}/etc/asterisk"
-@@ -165,10 +165,10 @@
+@@ -176,10 +176,10 @@ AC_DEFUN([CS_CHECK_PBX], [
  					PBX_TEMPMODDIR="${PBX_LIB}/asterisk/modules"
  				fi
  				if test -z "${PBX_VARLIB}"; then
@@ -33,5 +33,5 @@
 -					PBX_SBINDIR="/usr/sbin"
 +					PBX_SBINDIR="/opt/sbin"
  				fi 
- 
- 				LDFLAGS="$PBX_LDFLAGS"
+                                 if test -z "$PBX_SDATADIR"; then
+                                         PBX_DATADIR="${PBX_VARLIB}"
