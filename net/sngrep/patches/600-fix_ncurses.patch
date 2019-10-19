@@ -1,6 +1,6 @@
 --- a/configure.ac
 +++ b/configure.ac
-@@ -55,13 +55,10 @@
+@@ -55,13 +55,10 @@ AS_IF([test "x$enable_unicode" == "xyes"
  	# Ncurses with wide-character support
  	AC_DEFINE([WITH_UNICODE], [], [Compile With Unicode compatibility])
  

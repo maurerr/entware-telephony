@@ -45,10 +45,10 @@ $(call Package/rtpproxy/Default)
   MENU:=1
 endef
 
-define Package/rtpproxy/conffiles
-/etc/init.d/rtpproxy
-/etc/config/rtpproxy
-endef
+#define Package/rtpproxy/conffiles
+#/etc/init.d/rtpproxy
+#/etc/config/rtpproxy
+#endef
 
 define Package/rtpproxy-mod-acct-csv
 $(call Package/rtpproxy/Default)
